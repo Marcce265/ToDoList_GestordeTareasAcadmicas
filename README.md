@@ -27,7 +27,7 @@ Facilitar la organización académica mediante un gestor de tareas que permita:
 
 1. **Clonar el repositorio**
 ```bash
-git clone https://github.com/Marcce265/To-Do-List---Gestor-de-Tareas-Acad-micas.git
+git clone https://github.com/Marcce265/ToDoList_GestordeTareasAcadmicas.git
 cd TO-DO-LIST-GESTOR-DE-TAREAS-ACADEMICAS
 ```
 
