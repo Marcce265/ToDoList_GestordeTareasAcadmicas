@@ -1,5 +1,5 @@
 from src.modelo.declarative_base import Session
-from src.modelo.modelo import EstadoTarea, Perfil, Materia, Tarea
+from src.modelo.modelo import EstadoTarea, Perfil, Materia, Tarea, Prioridad
 
 class TaskManager:
     """
@@ -120,3 +120,6 @@ class TaskManager:
 
         finally:
             session.close()
+    
+
+

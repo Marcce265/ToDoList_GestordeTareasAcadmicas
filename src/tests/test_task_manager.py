@@ -92,3 +92,19 @@ class TestTaskManager(unittest.TestCase):
                 prioridad=Prioridad.Baja,
                 fecha=None
             )
+
+    def test_hu004_marcar_tarea_completada(self):
+        perfil = self.tm.crear_perfil("Usuario Test")
+        materia = self.tm.crear_materia(perfil.idPerfil, "Matemática")
+
+        tarea = self.tm.crear_tarea(
+            titulo="Estudiar",
+            descripcion="Parcial",
+            materia_id=materia.idMateria,
+            prioridad=Prioridad.Media,
+            fecha=None
+        )
+
+        tarea_actualizada = self.tm.marcar_tarea_completada(tarea.idTarea)
+
+        self.assertEqual(tarea_actualizada.estado.name, "Completada")

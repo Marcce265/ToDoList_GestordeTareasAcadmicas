@@ -1,4 +1,6 @@
 from src.modelo.declarative_base import engine, Base
+from datetime import datetime
+from src.modelo.modelo import Prioridad
 
 # Carga los modelos (Perfil, Materia, Tarea)
 import src.modelo.modelo
@@ -37,6 +39,7 @@ def mostrar_menu_perfil(nombre_perfil):
     print(f"\n=== MENÚ DE {nombre_perfil.upper()} ===")
     print("1. Crear materia")
     print("2. Listar materias")
+    print("3. Crear tarea")
     print("0. Volver")
 
 
@@ -94,9 +97,62 @@ def main():
                         print("\nMaterias:")
                         for m in materias:
                             print(f"- {m.nombre}")
+                except ValueError as e:
+                    print(f"Error: {e}")
+            elif opcion_perfil == "3":
+                try:
+                    materias = tm.listar_materias_por_perfil(perfil_activo.idPerfil)
+
+                    if not materias:
+                        print("No hay materias. Cree una primero.")
+                        continue
+
+                    print("\nMaterias disponibles:")
+                    for m in materias:
+                        print(f"{m.idMateria}. {m.nombre}")
+
+                    materia_id = int(input("Seleccione el ID de la materia: "))
+
+                    titulo = input("Título de la tarea: ")
+                    descripcion = input("Descripción: ")
+
+                    print("Prioridad:")
+                    print("1. Baja")
+                    print("2. Media")
+                    print("3. Alta")
+                    opcion_prioridad = input("Seleccione prioridad: ")
+
+                    prioridades = {
+                        "1": Prioridad.Baja,
+                        "2": Prioridad.Media,
+                        "3": Prioridad.Alta
+                    }
+
+                    if opcion_prioridad not in prioridades:
+                        print("Prioridad inválida")
+                        continue
+
+                    prioridad = prioridades[opcion_prioridad]
+
+                    fecha_str = input("Fecha de entrega (YYYY-MM-DD) o vacío: ")
+                    fecha = None
+                    if fecha_str.strip():
+                        fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+
+                    tm.crear_tarea(
+                        titulo=titulo,
+                        descripcion=descripcion,
+                        materia_id=materia_id,
+                        prioridad=prioridad,
+                        fecha=fecha
+                    )
+
+                    print("Tarea creada correctamente")
 
                 except ValueError as e:
                     print(f"Error: {e}")
+                except Exception:
+                    print("Formato de fecha inválido (use YYYY-MM-DD)")
 
             else:
                 print("Opción inválida")
