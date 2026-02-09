@@ -93,6 +93,12 @@ class TaskManager:
             raise ValueError("El título de la tarea es obligatorio")
 
         session = Session()
+
+        materia = session.query(Materia).filter_by(idMateria=materia_id).first()
+        if not materia:
+            session.close()
+            raise ValueError("Materia no existe")
+
         tarea = Tarea(
             titulo=titulo,
             descripcion=descripcion,
