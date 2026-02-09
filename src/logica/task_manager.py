@@ -70,3 +70,20 @@ class TaskManager:
         session.close()
 
         return materia
+    def listar_materias_por_perfil(self, perfil_id: int):
+        if perfil_id <= 0:
+            raise ValueError("ID de perfil inválido")
+
+        session = Session()
+
+        perfil = session.query(Perfil).filter_by(idPerfil=perfil_id).first()
+        if not perfil:
+            session.close()
+            raise ValueError("Perfil no existe")
+
+        materias = perfil.materias
+        session.close()
+
+        return materias
+    
+    
