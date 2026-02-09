@@ -121,5 +121,33 @@ class TaskManager:
         finally:
             session.close()
     
+    def marcar_tarea_completada(self, tarea_id: int) -> Tarea:
+
+    # Validación básica del ID
+        if tarea_id <= 0:
+            raise ValueError("ID de tarea inválido")
+
+        session = Session()
+        try:
+            # Buscar la tarea
+            tarea = session.query(Tarea).filter_by(idTarea=tarea_id).first()
+
+            if not tarea:
+                raise ValueError("Tarea no existe")
+
+            # Cambiar el estado a Completada
+            tarea.estado = EstadoTarea.Completada
+
+            session.commit()
+            session.refresh(tarea)
+
+            return tarea
+
+        finally:
+            session.close()
+
+    
+
+    
 
 
