@@ -217,3 +217,6 @@ class TaskManager:
             return tarea
         finally:
             session.close()
+
+            if nueva_descripcion is not None:
+                tarea.descripcion = nueva_descripcion
