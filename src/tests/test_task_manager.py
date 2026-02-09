@@ -39,5 +39,15 @@ class TestTaskManager(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.tm.crear_materia(perfil.idPerfil, "")
+            
+    # Verifica que se puedan listar las materias asociadas a un perfil
+    def test_hu002_listar_materias_por_perfil(self):
         
+        perfil = self.tm.crear_perfil("Usuario Test")
+        self.tm.crear_materia(perfil.idPerfil, "Matemáticas")
+        self.tm.crear_materia(perfil.idPerfil, "Física")
+
+        materias = self.tm.listar_materias_por_perfil(perfil.idPerfil)
+
+        self.assertEqual(len(materias), 2)    
 

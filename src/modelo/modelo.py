@@ -104,3 +104,5 @@ class Tarea(Base):
 
     # Relación muchos a uno con Materia
     materia = relationship("Materia", back_populates="tareas")
+
+    
