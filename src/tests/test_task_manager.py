@@ -1,6 +1,6 @@
 import unittest
 from src.logica.task_manager import TaskManager
-from src.modelo.modelo import Base, engine
+from src.modelo.declarative_base import Base, engine
 
 
 class TestTaskManager(unittest.TestCase):
