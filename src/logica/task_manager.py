@@ -146,6 +146,33 @@ class TaskManager:
         finally:
             session.close()
 
+    def desmarcar_tarea(self, tarea_id: int):
+        """
+        Devuelve una tarea completada al estado Pendiente.
+        """
+
+        # Validación básica del ID
+        if tarea_id <= 0:
+            raise ValueError("ID de tarea inválido")
+
+        session = Session()
+        try:
+            # Buscar la tarea
+            tarea = session.query(Tarea).filter_by(idTarea=tarea_id).first()
+
+            if not tarea:
+                raise ValueError("Tarea no existe")
+
+            # Cambiar el estado a Pendiente
+            tarea.estado = EstadoTarea.Pendiente
+
+            session.commit()
+            session.refresh(tarea)
+
+            return tarea
+
+        finally:
+            session.close()
 
 
     
