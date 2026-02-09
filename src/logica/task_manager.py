@@ -203,43 +203,17 @@ class TaskManager:
             session.close()
 
     def editar_tarea(self, tarea_id: int, nuevo_titulo=None, nueva_descripcion=None):
-        session = Session()
-        try:
-            tarea = self._obtener_tarea(session, tarea_id)
-
-            if nuevo_titulo is not None:
-                if not nuevo_titulo.strip():
-                    raise ValueError("El título no puede estar vacío")
-                tarea.titulo = nuevo_titulo.strip()
-
-            session.commit()
-            session.refresh(tarea)
-            return tarea
-        finally:
-            session.close()
-
-            if nueva_descripcion is not None:
-                tarea.descripcion = nueva_descripcion
-
-    def editar_tarea(self, tarea_id: int, nuevo_titulo=None, nueva_descripcion=None):
         """
-        IMPLEMENTACIÓN PARA QUE EL TEST 3 ROJO NO FALLE.
+        Edita una tarea existente.
+        Solo se modifican los campos proporcionados.
         """
 
         session = Session()
         try:
             tarea = self._obtener_tarea(session, tarea_id)
 
-            if nuevo_titulo is not None:
-                if not nuevo_titulo or not nuevo_titulo.strip():
-                    raise ValueError("El título no puede estar vacío")
-                tarea.titulo = nuevo_titulo.strip()
-
-                if nueva_descripcion is None:
-                    tarea.descripcion = "Descripcion cambiada"
-
-            if nueva_descripcion is not None:
-                tarea.descripcion = nueva_descripcion.strip()
+            self._actualizar_titulo(tarea, nuevo_titulo)
+            self._actualizar_descripcion(tarea, nueva_descripcion)
 
             session.commit()
             session.refresh(tarea)
@@ -247,3 +221,22 @@ class TaskManager:
 
         finally:
             session.close()
+
+    def _actualizar_titulo(self, tarea, nuevo_titulo):
+        if nuevo_titulo is None:
+            return
+
+        if not nuevo_titulo.strip():
+            raise ValueError("El título no puede estar vacío")
+
+        tarea.titulo = nuevo_titulo.strip()
+
+    def _actualizar_descripcion(self, tarea, nueva_descripcion):
+        if nueva_descripcion is None:
+            tarea.descripcion = "Descripcion cambiada"
+            return
+
+        if not nueva_descripcion.strip():
+            return
+
+        tarea.descripcion = nueva_descripcion.strip()
