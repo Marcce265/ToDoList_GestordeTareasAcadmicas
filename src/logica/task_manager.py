@@ -16,3 +16,4 @@ class TaskManager:
         perfil = session.query(Perfil).filter_by(idPerfil=id_perfil).first()
         session.close()
         return perfil
+
