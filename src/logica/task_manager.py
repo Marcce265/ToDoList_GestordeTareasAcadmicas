@@ -88,28 +88,35 @@ class TaskManager:
         return materias
 
     def crear_tarea(self, titulo, descripcion, materia_id, prioridad, fecha):
-        
+        """
+        Crea una tarea asociada a una materia existente.
+        """
+
+        # 1️⃣ Validación de negocio
         if not titulo or not titulo.strip():
             raise ValueError("El título de la tarea es obligatorio")
 
         session = Session()
+        try:
+            # 2️⃣ Validar existencia de materia
+            materia = session.query(Materia).filter_by(idMateria=materia_id).first()
+            if not materia:
+                raise ValueError("Materia no existe")
 
-        materia = session.query(Materia).filter_by(idMateria=materia_id).first()
-        if not materia:
+            # 3️⃣ Crear tarea
+            tarea = Tarea(
+                titulo=titulo.strip(),
+                descripcion=descripcion,
+                materia_id=materia_id,
+                prioridad=prioridad,
+                fechaEntrega=fecha,
+                estado=EstadoTarea.Pendiente
+            )
+
+            session.add(tarea)
+            session.commit()
+            session.refresh(tarea)
+            return tarea
+
+        finally:
             session.close()
-            raise ValueError("Materia no existe")
-
-        tarea = Tarea(
-            titulo=titulo,
-            descripcion=descripcion,
-            materia_id=materia_id,
-            prioridad=prioridad,
-            fechaEntrega=fecha,
-            estado=EstadoTarea.Pendiente
-        )
-
-        session.add(tarea)
-        session.commit()
-        session.refresh(tarea)
-        session.close()
-        return tarea
