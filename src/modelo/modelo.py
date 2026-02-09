@@ -56,7 +56,7 @@ class Materia(Base):
     nombre = Column(String, nullable=False)
 
     # Color identificador de la materia
-    color = Column(String, nullable=False)
+    color = Column(String, nullable=True)
 
     # Clave foránea que referencia al perfil dueño de la materia
     perfil_id = Column(Integer, ForeignKey('perfiles.idPerfil'))
@@ -70,6 +70,7 @@ class Materia(Base):
     # Relación uno a muchos con Tarea
     tareas = relationship(
         "Tarea", back_populates="materia", cascade="all, delete-orphan")
+    
 
 
 class Tarea(Base):

@@ -24,13 +24,20 @@ class TestTaskManager(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.tm.seleccionar_perfil(0)
 
+  # Verifica que se pueda crear una materia válida asociada a un perfil existente
     def test_hu002_escenario1_crear_materia_valida(self):
-        # Escenario 1: Datos válidos (Rojo)
-        resultado = self.tm.crear_materia(nombre="Matemáticas", descripcion="Cálculo I")
-        self.assertTrue(resultado)
+        
+        perfil = self.tm.crear_perfil("Usuario Test")
+        materia = self.tm.crear_materia(perfil.idPerfil, "Matemáticas")
+
+        self.assertIsNotNone(materia)
+        self.assertEqual(materia.nombre, "Matemáticas")
+
+    # Verifica que no se permita crear una materia con nombre vacío
     def test_hu002_escenario2_nombre_obligatorio(self):
-        # Escenario 2: No debe permitir nombres vacíos
+        perfil = self.tm.crear_perfil("Usuario Test")
+
         with self.assertRaises(ValueError):
-            self.tm.crear_materia(nombre="", descripcion="Sin nombre")
+            self.tm.crear_materia(perfil.idPerfil, "")
         
 

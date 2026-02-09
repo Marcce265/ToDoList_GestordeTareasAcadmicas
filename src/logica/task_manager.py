@@ -1,7 +1,5 @@
 from src.modelo.declarative_base import Session
-from src.modelo.modelo import Perfil,Materia 
-
-
+from src.modelo.modelo import Perfil, Materia
 class TaskManager:
     """
     Clase que contiene la lógica de negocio para la gestión de perfiles,
@@ -42,12 +40,33 @@ class TaskManager:
         perfil = session.query(Perfil).filter_by(idPerfil=id_perfil).first()
         session.close()
         return perfil
-    def crear_materia(self, nombre: str, descripcion: str) -> bool:
+
+    def seleccionar_perfil_por_nombre(self, nombre: str) -> Perfil | None:
         session = Session()
-        # Creamos la materia con un color por defecto ("#FFFFFF") 
-        # porque el modelo dice que no puede ser nulo.
-        nueva_materia = Materia(nombre=nombre, color="#FFFFFF") 
-        session.add(nueva_materia)
-        session.commit()
+        perfil = session.query(Perfil).filter_by(nombre=nombre).first()
         session.close()
-        return True
+        return perfil
+     
+    def crear_materia(self, perfil_id: int, nombre: str, color: str = "Azul") -> Materia:
+        if not nombre or not nombre.strip():
+            raise ValueError("El nombre de la materia es obligatorio")
+
+        session = Session()
+
+        perfil = session.query(Perfil).filter_by(idPerfil=perfil_id).first()
+        if not perfil:
+            session.close()
+            raise ValueError("Perfil no existe")
+
+        materia = Materia(
+            nombre=nombre.strip(),
+            color=color,
+            perfil=perfil
+        )
+
+        session.add(materia)
+        session.commit()
+        session.refresh(materia)
+        session.close()
+
+        return materia
