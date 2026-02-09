@@ -201,3 +201,19 @@ class TaskManager:
 
         finally:
             session.close()
+
+    def editar_tarea(self, tarea_id: int, nuevo_titulo=None, nueva_descripcion=None):
+        session = Session()
+        try:
+            tarea = self._obtener_tarea(session, tarea_id)
+
+            if nuevo_titulo is not None:
+                if not nuevo_titulo.strip():
+                    raise ValueError("El título no puede estar vacío")
+                tarea.titulo = nuevo_titulo.strip()
+
+            session.commit()
+            session.refresh(tarea)
+            return tarea
+        finally:
+            session.close()
