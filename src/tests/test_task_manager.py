@@ -160,3 +160,22 @@ class TestTaskManager(unittest.TestCase):
         # Intentar marcar otra vez (debería fallar → ROJO)
         with self.assertRaises(ValueError):
             self.tm.marcar_tarea_completada(tarea.idTarea)
+
+    def test_hu005_rojo_editar_titulo(self):
+        perfil = self.tm.crear_perfil("Usuario Test")
+        materia = self.tm.crear_materia(perfil.idPerfil, "Historia")
+
+        tarea = self.tm.crear_tarea(
+            titulo="Titulo viejo",
+            descripcion="Desc",
+            materia_id=materia.idMateria,
+            prioridad=Prioridad.Media,
+            fecha=None
+        )
+
+        tarea_editada = self.tm.editar_tarea(
+            tarea_id=tarea.idTarea,
+            nuevo_titulo="Titulo nuevo"
+        )
+
+        self.assertEqual(tarea_editada.titulo, "Titulo nuevo")
