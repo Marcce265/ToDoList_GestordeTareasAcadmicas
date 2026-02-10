@@ -260,6 +260,31 @@ class TaskManager:
 
         finally:
             session.close()
+
+    def editar_materia(self, id_materia: int, nuevo_nombre: str, nuevo_color: str):
+        session = Session()
+        try:
+            materia = session.query(Materia).filter_by(
+                idMateria=id_materia
+            ).first()
+
+            if not materia:
+                raise ValueError("Materia no existe")
+
+            #  VALIDACIÓN  (HU-006 Escenario 2)
+            if not nuevo_nombre or not nuevo_nombre.strip():
+                raise ValueError("El nombre de la materia es obligatorio")
+
+            materia.nombre = nuevo_nombre.strip()
+            materia.color = nuevo_color
+
+            session.commit()
+            session.refresh(materia)
+            return materia
+
+        finally:
+            session.close()
+
     
 
 
