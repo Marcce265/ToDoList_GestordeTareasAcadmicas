@@ -240,3 +240,27 @@ class TaskManager:
             return
 
         tarea.descripcion = nueva_descripcion.strip()
+
+    def editar_materia(self, id_materia: int, nuevo_nombre: str, nuevo_color: str):
+        session = Session()
+        try:
+            materia = session.query(Materia).filter_by(
+            idMateria=id_materia
+            ).first()
+
+            if not materia:
+                raise ValueError("Materia no existe")
+
+            materia.nombre = nuevo_nombre
+            materia.color = nuevo_color
+
+            session.commit()
+            session.refresh(materia)
+            return materia
+
+        finally:
+            session.close()
+    
+
+
+           
