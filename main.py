@@ -42,6 +42,7 @@ def mostrar_menu_perfil(nombre_perfil):
     print("4. Listar tareas")
     print("5. Marcar tarea como completada")
     print("6. Desmarcar tarea")
+    print("7. Editar tarea") 
     print("0. Volver")
 
 
@@ -202,7 +203,43 @@ def main():
 
                 except ValueError as e:
                     print(f"Error: {e}")
+            elif opcion_perfil == "7":
+                try:
+                    # Mostrar tareas disponibles
+                    materias = tm.listar_materias_por_perfil(perfil_activo.idPerfil)
 
+                    if not materias:
+                        print("No hay materias")
+                        continue
+
+                    print("\nTareas disponibles:")
+                    for m in materias:
+                        tareas = tm.listar_tareas_por_materia(m.idMateria)
+                        for t in tareas:
+                            print(f"[{t.idTarea}] {t.titulo} - {t.descripcion}")
+
+                    tarea_id = int(input("\nIngrese el ID de la tarea a editar: "))
+
+                    print("\nDeje vacío el campo que no quiera modificar")
+
+                    nuevo_titulo = input("Nuevo título: ")
+                    if not nuevo_titulo.strip():
+                        nuevo_titulo = None
+
+                    nueva_descripcion = input("Nueva descripción: ")
+                    if not nueva_descripcion.strip():
+                        nueva_descripcion = None
+
+                    tm.editar_tarea(
+                        tarea_id=tarea_id,
+                        nuevo_titulo=nuevo_titulo,
+                        nueva_descripcion=nueva_descripcion
+                    )
+
+                    print("Tarea editada correctamente")
+
+                except ValueError as e:
+                    print(f"Error: {e}")
             else:
                 print("Opción inválida")
 
