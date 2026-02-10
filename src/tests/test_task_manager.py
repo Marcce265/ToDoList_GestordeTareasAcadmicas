@@ -160,3 +160,69 @@ class TestTaskManager(unittest.TestCase):
         # Intentar marcar otra vez (debería fallar → ROJO)
         with self.assertRaises(ValueError):
             self.tm.marcar_tarea_completada(tarea.idTarea)
+
+    def test_hu005_rojo_editar_titulo(self):
+        perfil = self.tm.crear_perfil("Usuario Test")
+        materia = self.tm.crear_materia(perfil.idPerfil, "Historia")
+
+        tarea = self.tm.crear_tarea(
+            titulo="Titulo viejo",
+            descripcion="Desc",
+            materia_id=materia.idMateria,
+            prioridad=Prioridad.Media,
+            fecha=None
+        )
+
+        tarea_editada = self.tm.editar_tarea(
+            tarea_id=tarea.idTarea,
+            nuevo_titulo="Titulo nuevo"
+        )
+
+        self.assertEqual(tarea_editada.titulo, "Titulo nuevo")
+
+    def test_hu005_rojo_editar_descripcion(self):
+        perfil = self.tm.crear_perfil("Usuario Test")
+        materia = self.tm.crear_materia(perfil.idPerfil, "Lengua")
+
+        tarea = self.tm.crear_tarea(
+            titulo="Leer",
+            descripcion="Vieja",
+            materia_id=materia.idMateria,
+            prioridad=Prioridad.Baja,
+            fecha=None
+        )
+
+        tarea_editada = self.tm.editar_tarea(
+            tarea_id=tarea.idTarea,
+            nueva_descripcion="Nueva"
+        )
+
+        self.assertEqual(tarea_editada.descripcion, "Nueva")
+
+    def test_hu005_rojo_mantener_campos_no_editados(self):
+        """
+        TEST ROJO A PROPÓSITO:
+        Este test espera un comportamiento INCORRECTO,
+        por lo tanto DEBE FALLAR.
+        """
+
+        perfil = self.tm.crear_perfil("Usuario Test")
+        materia = self.tm.crear_materia(perfil.idPerfil, "Arte")
+
+        tarea = self.tm.crear_tarea(
+            titulo="Titulo original",
+            descripcion="Descripcion original",
+            materia_id=materia.idMateria,
+            prioridad=Prioridad.Alta,
+            fecha=None
+        )
+
+        # Editamos SOLO el título
+        tarea_editada = self.tm.editar_tarea(
+            tarea_id=tarea.idTarea,
+            nuevo_titulo="Titulo nuevo"
+        )
+
+        # La descripción NO debería cambiar,
+        # pero aquí decimos que sí cambia
+        self.assertEqual(tarea_editada.descripcion, "Descripcion cambiada")
