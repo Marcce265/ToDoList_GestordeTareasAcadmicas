@@ -102,7 +102,12 @@ def main():
                     else:
                         print("\nMaterias:")
                         for m in materias:
-                            print(f"- {m.nombre}")
+                            cantidad_tareas = len(m.tareas)
+                            print(
+                                f"[{m.idMateria}] {m.nombre} | "
+                                f"Color: {m.color} | "
+                                f"Tareas: {cantidad_tareas}"
+                            )
                 except ValueError as e:
                     print(f"Error: {e}")
             elif opcion_perfil == "3":
@@ -180,10 +185,13 @@ def main():
                             print("  (Sin tareas)")
                         else:
                             for t in tareas:
-                                print(
-                                    f"  [{t.idTarea}] {t.titulo} - {t.estado.name}"
-                                )
+                                fecha = t.fechaEntrega if t.fechaEntrega else "Sin fecha"
 
+                                print(f"  [{t.idTarea}] {t.titulo}")
+                                print(f"      Descripción: {t.descripcion}")
+                                print(f"      Fecha: {fecha}")
+                                print(f"      Prioridad: {t.prioridad.name}")
+                                print(f"      Estado: {t.estado.name}")
                 except ValueError as e:
                     print(f"Error: {e}")
 

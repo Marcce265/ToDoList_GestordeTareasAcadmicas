@@ -79,15 +79,22 @@ class TaskManager:
 
         session = Session()
 
-        perfil = session.query(Perfil).filter_by(idPerfil=perfil_id).first()
-        if not perfil:
+        try:
+            perfil = session.query(Perfil).filter_by(idPerfil=perfil_id).first()
+
+            if not perfil:
+                raise ValueError("Perfil no existe")
+
+            # Forzar carga completa
+            materias = []
+            for m in perfil.materias:
+                _ = list(m.tareas)  # fuerza carga de tareas
+                materias.append(m)
+
+            return materias
+
+        finally:
             session.close()
-            raise ValueError("Perfil no existe")
-
-        materias = perfil.materias
-        session.close()
-
-        return materias
 
     def crear_tarea(self, titulo, descripcion, materia_id, prioridad, fecha):
         """
@@ -232,9 +239,7 @@ class TaskManager:
         tarea.titulo = nuevo_titulo.strip()
 
     def _actualizar_descripcion(self, tarea, nueva_descripcion):
-        # Si no se envía nueva descripción, cambiarla igualmente
         if nueva_descripcion is None:
-            tarea.descripcion = "Descripcion cambiada"
             return
 
         if not nueva_descripcion.strip():
