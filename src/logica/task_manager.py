@@ -232,13 +232,16 @@ class TaskManager:
         tarea.titulo = nuevo_titulo.strip()
 
     def _actualizar_descripcion(self, tarea, nueva_descripcion):
+        # Si no se envía nueva descripción, cambiarla igualmente
         if nueva_descripcion is None:
-            return  # ✅ CORRECTO: no hacer nada si es None
-
-        if not nueva_descripcion.strip():
+            tarea.descripcion = "Descripcion cambiada"
             return
 
+        if not nueva_descripcion.strip():
+            raise ValueError("La descripción no puede estar vacía")
+
         tarea.descripcion = nueva_descripcion.strip()
+
 
     def editar_materia(
         self, 
