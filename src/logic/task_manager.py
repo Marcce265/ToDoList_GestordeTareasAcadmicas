@@ -95,6 +95,7 @@ class TaskManager:
         """
         HU-003: Crea una materia asociada a un usuario.
         """
+
         session = Session()
         try:
             usuario = session.query(Usuario).filter_by(
@@ -104,6 +105,9 @@ class TaskManager:
             if not usuario:
                 raise ValueError("El usuario no existe")
 
+            if not nombre or not nombre.strip():
+                raise ValueError(
+                    "El nombre de la materia no puede estar vacío")
             materia = Materia(
                 nombre=nombre.strip(),
                 color=color.strip(),
