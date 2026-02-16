@@ -67,11 +67,25 @@ class TaskManager:
         if id_usuario <= 0:
             raise ValueError("El ID del usuario debe ser mayor a 0")
         
+        # 2. ABRIR CONEXIÓN
+        # Creamos una 'session' para poder hablar con la base de datos.
         session = Session()
         try:
+            # 3. CONSULTA (QUERY)
+            # Le decimos a la base de datos:
+            # - query(Usuario): "Busca en la tabla de Usuarios..."
+            # - filter_by(...): "...donde la columna idUsuario sea igual al id que me pasaron..."
+            # - first(): "...y dame el primer resultado (o None si no encuentra nada)."
             usuario = session.query(Usuario).filter_by(
                 idUsuario=id_usuario
             ).first()
+            
+            # 4. RETORNO
+            # Devolvemos el objeto usuario encontrado (o None) a quien llamó la función.
             return usuario
+            
         finally:
+            # 5. CIERRE (CLEANUP)
+            # Este bloque 'finally' se ejecuta SIEMPRE, haya error o no.
+            # Cerramos la sesión para liberar memoria y no dejar conexiones colgadas.
             session.close()
