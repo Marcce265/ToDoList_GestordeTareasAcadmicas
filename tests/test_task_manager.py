@@ -90,3 +90,13 @@ class TestTaskManager(unittest.TestCase):
         self.assertIsNotNone(usuario)
         self.assertEqual(usuario.nombre, "Juan")
         self.assertEqual(usuario.correo, "juan@mail.com")
+    
+    def test_hu003_rojo_crear_materia_usuario_inexistente(self):
+        """
+        HU-003 - Caso rojo
+        No se debe permitir crear materia sin usuario válido
+        """
+        with self.assertRaises(ValueError) as context:
+            self.tm.crear_materia(999, "Matemáticas", "Azul")
+        
+        self.assertIn("usuario", str(context.exception).lower())
