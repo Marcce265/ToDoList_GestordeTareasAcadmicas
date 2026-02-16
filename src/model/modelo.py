@@ -21,6 +21,7 @@ class Usuario(Base):
     idUsuario = Column(Integer, primary_key=True)
     nombre = Column(String, nullable=False)
     correo = Column(String, nullable=False, unique=True)
+    fecha_creacion = Column(Date, nullable=True)
 
     materias = relationship(
         "Materia",

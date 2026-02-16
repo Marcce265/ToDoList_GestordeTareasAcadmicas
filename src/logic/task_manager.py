@@ -22,7 +22,7 @@ class TaskManager:
         Raises:
             ValueError: Si nombre o correo están vacíos, o correo duplicado
         """
-        '''if not nombre or not nombre.strip():
+        if not nombre or not nombre.strip():
             raise ValueError("El nombre no puede estar vacío")
         
         if not correo or not correo.strip():
@@ -49,5 +49,5 @@ class TaskManager:
             session.refresh(usuario)
             return usuario
         finally:
-            session.close()'''
+            session.close()
         # Código temporal para pasar la prueba inicial
