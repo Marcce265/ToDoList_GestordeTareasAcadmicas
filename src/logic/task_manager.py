@@ -144,17 +144,20 @@ class TaskManager:
         if not titulo or not titulo.strip():
             raise ValueError("El título de la tarea no puede estar vacío")
             
+        # =========================================================
+         # ESCENARIO 3 (VERDE) <---
+        # =========================================================
+        if not isinstance(prioridad, Prioridad):
+            raise ValueError("La prioridad asignada no es válida. Use Prioridad.Baja, Prioridad.Media o Prioridad.Alta.")
+            
         session = Session()
         try:
             # Validación Escenario 2: Verificar que la materia exista
-            # Buscamos en la base de datos una materia con el ID proporcionado
             materia_existente = session.query(Materia).filter_by(idMateria=materia_id).first()
-            
-            # Si no encontramos nada (None), lanzamos el error que espera la prueba
             if not materia_existente:
                 raise ValueError(f"La materia con ID {materia_id} no existe. No se puede crear la tarea.")
 
-            # Si pasa las validaciones, creamos y guardamos la tarea
+            # Si pasa todas las validaciones, creamos la tarea
             tarea = Tarea(
                 titulo=titulo.strip(),
                 descripcion=descripcion.strip() if descripcion else "",
