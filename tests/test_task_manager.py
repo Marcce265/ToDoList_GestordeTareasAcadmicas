@@ -347,3 +347,13 @@ class TestTaskManager(unittest.TestCase):
                 nuevo_correo="juan@mail.com"
             )
         self.assertIn("correo", str(context.exception).lower())
+    
+    def test_hu006_verde_editar_usuario_caso_feliz(self):
+        usuario = self.tm.crear_usuario("Juan", "juan@mail.com")
+        editado = self.tm.editar_usuario(
+            usuario.idUsuario,
+            nuevo_nombre="Juan Carlos",
+            nuevo_correo="juancarlos@mail.com"
+        )
+        self.assertEqual(editado.nombre, "Juan Carlos")
+        self.assertEqual(editado.correo, "juancarlos@mail.com")

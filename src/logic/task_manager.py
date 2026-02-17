@@ -210,7 +210,7 @@ class TaskManager:
     def desmarcar_tarea(self, tarea_id: int) -> Tarea:
         return self._cambiar_estado_tarea(tarea_id, EstadoTarea.Pendiente)
     
-    """def editar_usuario(
+    def editar_usuario(
         self,
         id_usuario: int,
         nuevo_nombre: Optional[str] = None,
@@ -245,4 +245,4 @@ class TaskManager:
             session.refresh(usuario)
             return usuario
         finally:
-            session.close()"""
+            session.close()
