@@ -2,7 +2,7 @@ from datetime import date
 from typing import Optional
 from sqlalchemy.orm import sessionmaker
 from src.model.declarative_base import engine
-from src.model.modelo import Usuario, Materia
+from src.model.modelo import Usuario, Materia, Tarea, Prioridad
 
 Session = sessionmaker(bind=engine)
 
@@ -133,5 +133,30 @@ class TaskManager:
             session.refresh(materia)
             return materia
 
+        finally:
+            session.close()
+
+    def crear_tarea(self, titulo: str, descripcion: str, prioridad: Prioridad, fecha_entrega: date, materia_id: int) -> Tarea:
+        """
+        HU-004: Crea una nueva tarea asociada a una materia.
+        """
+        # Validación del Escenario 1
+        if not titulo or not titulo.strip():
+            raise ValueError("El título de la tarea no puede estar vacío")
+            
+        session = Session()
+        try:
+            # Lógica básica de persistencia
+            tarea = Tarea(
+                titulo=titulo.strip(),
+                descripcion=descripcion.strip() if descripcion else "",
+                prioridad=prioridad,
+                fechaEntrega=fecha_entrega,
+                materia_id=materia_id
+            )
+            session.add(tarea)
+            session.commit()
+            session.refresh(tarea)
+            return tarea
         finally:
             session.close()
