@@ -335,7 +335,7 @@ class TaskManager:
         finally:
             session.close()
             
-    """def editar_tarea(
+    def editar_tarea(
         self,
         id_tarea: int,
         nuevo_titulo: Optional[str] = None,
@@ -369,4 +369,4 @@ class TaskManager:
             session.refresh(tarea)
             return tarea
         finally:
-            session.close()"""
+            session.close()
