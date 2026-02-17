@@ -342,6 +342,21 @@ class TaskManager:
         nueva_descripcion: Optional[str] = None,
         nueva_prioridad: Optional[Prioridad] = None
     ) -> Tarea:
+        """
+        HU-009: Edita una tarea existente.
+
+        Args:
+            id_tarea: ID de la tarea a editar
+            nuevo_titulo: Nuevo título (opcional)
+            nueva_descripcion: Nueva descripción (opcional)
+            nueva_prioridad: Nueva prioridad (opcional)
+
+        Returns:
+            Tarea actualizada
+
+        Raises:
+            ValueError: Si título vacío o prioridad inválida
+        """
         session = Session()
         try:
             tarea = session.query(Tarea).filter_by(
