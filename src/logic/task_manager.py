@@ -209,3 +209,40 @@ class TaskManager:
 
     def desmarcar_tarea(self, tarea_id: int) -> Tarea:
         return self._cambiar_estado_tarea(tarea_id, EstadoTarea.Pendiente)
+    
+    """def editar_usuario(
+        self,
+        id_usuario: int,
+        nuevo_nombre: Optional[str] = None,
+        nuevo_correo: Optional[str] = None
+    ) -> Usuario:
+        session = Session()
+        try:
+            usuario = session.query(Usuario).filter_by(
+                idUsuario=id_usuario
+            ).first()
+
+            if nuevo_nombre is not None:
+                if not nuevo_nombre.strip():
+                    raise ValueError(
+                        "El nombre no puede estar vacío"
+                    )
+                usuario.nombre = nuevo_nombre.strip()
+
+            if nuevo_correo is not None:
+                existente = session.query(Usuario).filter(
+                    Usuario.correo == nuevo_correo.strip(),
+                    Usuario.idUsuario != id_usuario
+                ).first()
+                if existente:
+                    raise ValueError(
+                        f"El correo {nuevo_correo} "
+                        "ya está registrado"
+                    )
+                usuario.correo = nuevo_correo.strip()
+
+            session.commit()
+            session.refresh(usuario)
+            return usuario
+        finally:
+            session.close()"""
