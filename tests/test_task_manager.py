@@ -385,3 +385,16 @@ class TestTaskManager(unittest.TestCase):
         # 3. Aserción: Lo buscamos de nuevo. Debería darnos None.
         usuario_buscado = self.tm.seleccionar_usuario(id_real)
         self.assertIsNone(usuario_buscado, "El usuario aún existe en la BD, no fue eliminado")
+        
+    def test_hu007_escenario3_rojo_eliminar_usuario_id_invalido(self):
+        """
+        HU-007 - Escenario 3: Intentar eliminar un usuario enviando un ID 
+        que no es un número (por ejemplo, un texto).
+        Debe lanzar un TypeError o ValueError.
+        """
+        # Enviamos un texto en lugar de un ID numérico
+        with self.assertRaises(TypeError) as context:
+            self.tm.eliminar_usuario("ID_FALSO_ABC")
+        
+        # Verificamos que el error nos hable sobre el tipo de dato
+        self.assertIn("debe ser un número", str(context.exception).lower())
