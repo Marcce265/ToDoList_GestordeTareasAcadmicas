@@ -357,3 +357,13 @@ class TestTaskManager(unittest.TestCase):
         )
         self.assertEqual(editado.nombre, "Juan Carlos")
         self.assertEqual(editado.correo, "juancarlos@mail.com")
+
+    def test_hu007_escenario1_rojo_eliminar_usuario_inexistente(self):
+        """
+        HU-007 - Escenario 1: Intentar eliminar un usuario que no existe.
+        Debe lanzar un ValueError.
+        """
+        with self.assertRaises(ValueError) as context:
+            self.tm.eliminar_perfil(999) # Mandamos un ID fantasma
+        
+        self.assertIn("no existe", str(context.exception).lower())
