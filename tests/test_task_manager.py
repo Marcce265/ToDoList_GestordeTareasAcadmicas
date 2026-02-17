@@ -262,3 +262,15 @@ class TestTaskManager(unittest.TestCase):
         self.assertEqual(tarea.prioridad, Prioridad.Alta)
         # self.assertEqual(tarea.progreso, 0.0) # Descomenta si usas el campo progreso
 
+    def test_hu005_rojo_marcar_tarea_inexistente(self):
+        """
+        HU-005 - Escenario 1 (Rojo)
+        No se debe permitir marcar como completada una tarea que no existe.
+        """
+
+        # Intentamos marcar una tarea con ID inexistente
+        with self.assertRaises(ValueError) as context:
+            self.tm.marcar_tarea(9999)  # ID que no existe
+
+        # Verificamos que el mensaje mencione que la tarea no existe
+        self.assertIn("tarea", str(context.exception).lower())
