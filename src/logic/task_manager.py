@@ -140,13 +140,21 @@ class TaskManager:
         """
         HU-004: Crea una nueva tarea asociada a una materia.
         """
-        # Validación del Escenario 1
+        # Validación Escenario 1: Título vacío
         if not titulo or not titulo.strip():
             raise ValueError("El título de la tarea no puede estar vacío")
             
         session = Session()
         try:
-            # Lógica básica de persistencia
+            # Validación Escenario 2: Verificar que la materia exista
+            # Buscamos en la base de datos una materia con el ID proporcionado
+            materia_existente = session.query(Materia).filter_by(idMateria=materia_id).first()
+            
+            # Si no encontramos nada (None), lanzamos el error que espera la prueba
+            if not materia_existente:
+                raise ValueError(f"La materia con ID {materia_id} no existe. No se puede crear la tarea.")
+
+            # Si pasa las validaciones, creamos y guardamos la tarea
             tarea = Tarea(
                 titulo=titulo.strip(),
                 descripcion=descripcion.strip() if descripcion else "",
