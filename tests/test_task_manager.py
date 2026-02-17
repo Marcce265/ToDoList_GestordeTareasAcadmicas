@@ -398,3 +398,19 @@ class TestTaskManager(unittest.TestCase):
         
         # Verificamos que el error nos hable sobre el tipo de dato
         self.assertIn("debe ser un número", str(context.exception).lower())
+
+    def test_hu008_rojo_editar_materia_inexistente(self):
+        """
+        HU-008 - Escenario 1 (Rojo)
+        No se debe permitir editar una materia que no existe.
+        """
+
+        # Intentamos editar una materia con ID inexistente
+        with self.assertRaises(ValueError) as context:
+            self.tm.editar_materia(
+                9999,  # ID que no existe
+                nuevo_nombre="Nueva Materia"
+            )
+
+        # Verificamos que el mensaje mencione que la materia no existe
+        self.assertIn("materia", str(context.exception).lower())
