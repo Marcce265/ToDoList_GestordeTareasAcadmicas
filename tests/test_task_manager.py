@@ -438,3 +438,28 @@ class TestTaskManager(unittest.TestCase):
 
         # 3️⃣ Verificamos que el error mencione el problema
         self.assertIn("nombre", str(context.exception).lower())
+
+    def test_hu008_rojo_editar_materia_correctamente(self):
+        """
+        HU-008 - Escenario 3 (Rojo)
+        Editar correctamente el nombre y color de una materia existente.
+        """
+
+        # 1️⃣ Preparación
+        usuario = self.tm.crear_usuario("Mario", "mario@mail.com")
+        materia = self.tm.crear_materia(
+            usuario.idUsuario,
+            "Geografía",
+            "Azul"
+        )
+
+        # 2️⃣ Acción
+        materia_editada = self.tm.editar_materia(
+            materia.idMateria,
+            nuevo_nombre="Geografía Mundial",
+            nuevo_color="Rojo"
+        )
+
+        # 3️⃣ Aserciones
+        self.assertEqual(materia_editada.nombre, "Geografía Mundial")
+        self.assertEqual(materia_editada.color, "Rojo")
