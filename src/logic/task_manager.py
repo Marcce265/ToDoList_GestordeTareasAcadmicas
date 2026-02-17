@@ -211,3 +211,37 @@ class TaskManager:
 
         finally:
             session.close()
+
+    def desmarcar_tarea(self, tarea_id: int) -> Tarea:
+        """
+        HU-005: Desmarca una tarea (la cambia a Pendiente).
+
+        Args:
+            tarea_id (int): ID de la tarea a desmarcar.
+
+        Returns:
+            Tarea: Objeto tarea actualizado.
+
+        Raises:
+            ValueError: Si la tarea no existe.
+        """
+
+        session = Session()
+        try:
+            # Buscar la tarea por ID
+            tarea = session.query(Tarea).filter_by(idTarea=tarea_id).first()
+
+            # Validar que exista
+            if not tarea:
+                raise ValueError("La tarea no existe")
+
+            # Cambiar estado a PENDIENTE
+            tarea.estado = EstadoTarea.Pendiente
+
+            session.commit()
+            session.refresh(tarea)
+
+            return tarea
+
+        finally:
+            session.close()
