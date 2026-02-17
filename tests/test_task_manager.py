@@ -2,7 +2,7 @@ from datetime import date
 import unittest
 from src.logic.task_manager import TaskManager
 from src.model.declarative_base import Base, engine
-from src.model.modelo import Usuario  # Importamos para aserciones
+from src.model.modelo import Prioridad, Usuario  # Importamos para aserciones
 
 
 class TestTaskManager(unittest.TestCase):
@@ -473,7 +473,7 @@ class TestTaskManager(unittest.TestCase):
                 descripcion="",
                 materia_id=materia.idMateria,
                 prioridad=Prioridad.Media,
-                fecha=date.today()
+                fecha_entrega=date.today()
             )
             
             with self.assertRaises(ValueError) as context:
