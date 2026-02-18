@@ -357,3 +357,16 @@ class TestTaskManager(unittest.TestCase):
         )
         self.assertEqual(editado.nombre, "Juan Carlos")
         self.assertEqual(editado.correo, "juancarlos@mail.com")
+    
+    def test_hu011_escenario1_rojo_eliminar_tarea_inexistente(self):
+        """
+        HU-011 - Escenario 1: Intentar eliminar una tarea con un ID inexistente.
+        
+        
+        """
+        # Intentamos eliminar la tarea con un ID ficticio
+        with self.assertRaises(ValueError) as context:
+            self.tm.eliminar_tarea(9999)
+        
+        # Verificamos que el error contenga el mensaje esperado
+        self.assertIn("la tarea con id 9999 no existe", str(context.exception).lower())
