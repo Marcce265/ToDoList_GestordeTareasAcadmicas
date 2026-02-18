@@ -413,9 +413,3 @@ class TaskManager:
         finally:
             session.close()
 
-    def seleccionar_tarea(self, tarea_id: int):
-        session = Session()
-        try:
-            return session.query(Tarea).filter_by(idTarea=tarea_id).first()
-        finally:
-            session.close()
