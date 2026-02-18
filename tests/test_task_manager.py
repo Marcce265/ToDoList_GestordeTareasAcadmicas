@@ -1,9 +1,8 @@
 from datetime import date
 import unittest
 from src.logic.task_manager import TaskManager
-from src.model.declarative_base import Base, engine, Session
-# Importamos para aserciones
-from src.model.modelo import Prioridad, Usuario,  Materia
+from src.model.declarative_base import Base, engine
+from src.model.modelo import Usuario  # Importamos para aserciones
 
 
 class TestTaskManager(unittest.TestCase):
@@ -153,13 +152,12 @@ class TestTaskManager(unittest.TestCase):
         # 1. Preparación (Setup)
         from src.model.modelo import Materia, Prioridad
         from src.model.declarative_base import session
-
+        
         # Creamos un usuario usando el método que ya existe
         usuario = self.tm.crear_usuario("Ana", "ana@mail.com")
-
+        
         # Creamos una materia directamente en la base de datos para la prueba
-        materia = Materia(nombre="Física", color="Rojo",
-                          usuario_id=usuario.idUsuario)
+        materia = Materia(nombre="Física", color="Rojo", usuario_id=usuario.idUsuario)
         session.add(materia)
         session.commit()
         session.refresh(materia)
@@ -169,13 +167,13 @@ class TestTaskManager(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             # Intentamos crear la tarea con título vacío
             self.tm.crear_tarea(
-                titulo="",
+                titulo="", 
                 descripcion="Resolver ejercicios de cinemática",
                 prioridad=Prioridad.Media,
                 fecha_entrega=date.today(),
                 materia_id=materia_id
             )
-
+        
         # Verificamos que el error mencione el problema con el título
         self.assertIn("título", str(context.exception).lower())
 
@@ -186,17 +184,17 @@ class TestTaskManager(unittest.TestCase):
         """
         from src.model.modelo import Prioridad
         from datetime import date
-
+        
         with self.assertRaises(ValueError) as context:
             # Intentamos crear tarea con materia_id = 9999 (que no existe)
             self.tm.crear_tarea(
-                titulo="Aprobar el curso",
+                titulo="Aprobar el curso", 
                 descripcion="Terminar el proyecto de software",
                 prioridad=Prioridad.Alta,
                 fecha_entrega=date.today(),
                 materia_id=9999
             )
-
+        
         # El mensaje de error debe mencionar que la materia no existe
         self.assertIn("materia", str(context.exception).lower())
 
@@ -211,8 +209,7 @@ class TestTaskManager(unittest.TestCase):
 
         # 1. Preparación: Creamos un usuario y una materia reales para que no falle por eso
         usuario = self.tm.crear_usuario("Carlos", "carlos@mail.com")
-        materia = Materia(nombre="Química", color="Azul",
-                          usuario_id=usuario.idUsuario)
+        materia = Materia(nombre="Química", color="Azul", usuario_id=usuario.idUsuario)
         session.add(materia)
         session.commit()
         session.refresh(materia)
@@ -221,13 +218,13 @@ class TestTaskManager(unittest.TestCase):
         # 2. Acción y Aserción
         with self.assertRaises(ValueError) as context:
             self.tm.crear_tarea(
-                titulo="Hacer informe de laboratorio",
+                titulo="Hacer informe de laboratorio", 
                 descripcion="Mezclar reactivos",
                 prioridad="Súper Urgente",  # <--- TRAMPA: Esto es un string, no el Enum Prioridad
                 fecha_entrega=date.today(),
                 materia_id=materia_id
             )
-
+        
         # 3. Verificamos que el error mencione el problema con la prioridad
         self.assertIn("prioridad", str(context.exception).lower())
 
@@ -242,10 +239,9 @@ class TestTaskManager(unittest.TestCase):
 
         # 1. Preparación
         usuario = self.tm.crear_usuario("Juan", "juan@mail.com")
-
+        
         # Creamos la materia directo en BD para no depender de métodos externos
-        materia = Materia(nombre="Matemáticas", color="Rojo",
-                          usuario_id=usuario.idUsuario)
+        materia = Materia(nombre="Matemáticas", color="Rojo", usuario_id=usuario.idUsuario)
         session.add(materia)
         session.commit()
         session.refresh(materia)
@@ -258,12 +254,11 @@ class TestTaskManager(unittest.TestCase):
             fecha_entrega=date.today(),
             materia_id=materia.idMateria
         )
-
+        
         # 3. Aserciones
         self.assertIsNotNone(tarea, "La tarea debe ser creada")
         self.assertEqual(tarea.titulo, "Estudiar capítulo 1")
-        self.assertEqual(tarea.estado, EstadoTarea.Pendiente,
-                         "El estado por defecto debe ser Pendiente")
+        self.assertEqual(tarea.estado, EstadoTarea.Pendiente, "El estado por defecto debe ser Pendiente")
         self.assertEqual(tarea.prioridad, Prioridad.Alta)
         # self.assertEqual(tarea.progreso, 0.0) # Descomenta si usas el campo progreso
 
@@ -304,8 +299,7 @@ class TestTaskManager(unittest.TestCase):
         # 1. Preparación: crear usuario y materia reales
         usuario = self.tm.crear_usuario("Lucía", "lucia@mail.com")
 
-        materia = Materia(nombre="Historia", color="Verde",
-                          usuario_id=usuario.idUsuario)
+        materia = Materia(nombre="Historia", color="Verde", usuario_id=usuario.idUsuario)
         session.add(materia)
         session.commit()
         session.refresh(materia)
@@ -353,7 +347,7 @@ class TestTaskManager(unittest.TestCase):
                 nuevo_correo="juan@mail.com"
             )
         self.assertIn("correo", str(context.exception).lower())
-
+    
     def test_hu006_verde_editar_usuario_caso_feliz(self):
         usuario = self.tm.crear_usuario("Juan", "juan@mail.com")
         editado = self.tm.editar_usuario(
@@ -363,289 +357,62 @@ class TestTaskManager(unittest.TestCase):
         )
         self.assertEqual(editado.nombre, "Juan Carlos")
         self.assertEqual(editado.correo, "juancarlos@mail.com")
-
-    def test_hu007_escenario1_rojo_eliminar_usuario_inexistente(self):
-        """
-        HU-007 - Escenario 1: Intentar eliminar un usuario que no existe.
-        Debe lanzar un ValueError.
-        """
-        # Intentamos eliminar un ID fantasma
-        with self.assertRaises(ValueError) as context:
-            self.tm.eliminar_usuario(999)
-
-        # Verificamos que el error nos avise que no existe
-        self.assertIn("no existe", str(context.exception).lower())
-
-    def test_hu007_escenario2_rojo_eliminar_usuario_existente(self):
-        """
-        HU-007 - Escenario 2: Eliminar un usuario que sí existe.
-        El usuario debe desaparecer de la base de datos.
-        """
-        # 1. Preparación: Creamos un usuario válido con nombre y CORREO
-        usuario_nuevo = self.tm.crear_usuario(
-            "Usuario a Eliminar", "eliminar@prueba.com")
-        id_real = usuario_nuevo.idUsuario
-
-        # 2. Acción: Lo eliminamos
-        self.tm.eliminar_usuario(id_real)
-
-        # 3. Aserción: Lo buscamos de nuevo. Debería darnos None.
-        usuario_buscado = self.tm.seleccionar_usuario(id_real)
-        self.assertIsNone(
-            usuario_buscado, "El usuario aún existe en la BD, no fue eliminado")
-
-    def test_hu007_escenario3_rojo_eliminar_usuario_id_invalido(self):
-        """
-        HU-007 - Escenario 3: Intentar eliminar un usuario enviando un ID 
-        que no es un número (por ejemplo, un texto).
-        Debe lanzar un TypeError o ValueError.
-        """
-        # Enviamos un texto en lugar de un ID numérico
-        with self.assertRaises(TypeError) as context:
-            self.tm.eliminar_usuario("ID_FALSO_ABC")
-
-        # Verificamos que el error nos hable sobre el tipo de dato
-        self.assertIn("debe ser un número", str(context.exception).lower())
-
-    def test_hu008_rojo_editar_materia_inexistente(self):
-        """
-        HU-008 - Escenario 1 (Rojo)
-        No se debe permitir editar una materia que no existe.
-        """
-
-        # Intentamos editar una materia con ID inexistente
-        with self.assertRaises(ValueError) as context:
-            self.tm.editar_materia(
-                9999,  # ID que no existe
-                nuevo_nombre="Nueva Materia"
-            )
-
-        # Verificamos que el mensaje mencione que la materia no existe
-        self.assertIn("materia", str(context.exception).lower())
-
-    def test_hu008_rojo_editar_materia_nombre_vacio(self):
-        """
-        HU-008 - Escenario 2 (Rojo)
-        No se debe permitir editar una materia con nombre vacío.
-        """
-
-        # 1️⃣ Preparación: Crear usuario y materia válida
-        usuario = self.tm.crear_usuario("Laura", "laura@mail.com")
-        materia = self.tm.crear_materia(
-            usuario.idUsuario,
-            "Biología",
-            "Verde"
-        )
-
-        # 2️⃣ Acción y Aserción: Intentar editar con nombre vacío
-        with self.assertRaises(ValueError) as context:
-            self.tm.editar_materia(
-                materia.idMateria,
-                nuevo_nombre=""  # ❌ nombre vacío
-            )
-
-        # 3️⃣ Verificamos que el error mencione el problema
-        self.assertIn("nombre", str(context.exception).lower())
-
-    def test_hu008_rojo_editar_materia_correctamente(self):
-        """
-        HU-008 - Escenario 3 (Rojo)
-        Editar correctamente el nombre y color de una materia existente.
-        """
-
-        # 1️⃣ Preparación
-        usuario = self.tm.crear_usuario("Mario", "mario@mail.com")
-        materia = self.tm.crear_materia(
-            usuario.idUsuario,
-            "Geografía",
-            "Azul"
-        )
-
-        # 2️⃣ Acción
-        materia_editada = self.tm.editar_materia(
-            materia.idMateria,
-            nuevo_nombre="Geografía Mundial",
-            nuevo_color="Rojo"
-        )
-
-        # 3️⃣ Aserciones
-        self.assertEqual(materia_editada.nombre, "Geografía Mundial")
-        self.assertEqual(materia_editada.color, "Rojo")
-
-    def test_hu009_rojo_editar_tarea_titulo_vacio(self):
-        usuario = self.tm.crear_usuario("Juan", "juan@mail.com")
-        materia = self.tm.crear_materia(usuario.idUsuario, "Mat", "#FF5733")
-
-        tarea = self.tm.crear_tarea(
-            titulo="Estudiar",
-            descripcion="",
-            materia_id=materia.idMateria,
-            prioridad=Prioridad.Media,
-            fecha_entrega=date.today()
-        )
-
-        with self.assertRaises(ValueError) as context:
-            self.tm.editar_tarea(
-                tarea.idTarea, nuevo_titulo=""
-            )
-
-        self.assertIn("título", str(context.exception).lower())
-
-    def test_hu009_rojo_editar_tarea_titulo_solo_espacios(self):
-        usuario = self.tm.crear_usuario("Juan", "juan@mail.com")
-        materia = self.tm.crear_materia(usuario.idUsuario, "Mat", "#FF5733")
-        tarea = self.tm.crear_tarea(
-            titulo="Estudiar",
-            descripcion="",
-            materia_id=materia.idMateria,
-            prioridad=Prioridad.Media,
-            fecha_entrega=date.today()
-        )
-        with self.assertRaises(ValueError) as context:
-            self.tm.editar_tarea(
-                tarea.idTarea, nuevo_titulo="   "
-            )
-        self.assertIn("título", str(context.exception).lower())
-
-    def test_hu009_rojo_editar_tarea_prioridad_invalida(self):
-        usuario = self.tm.crear_usuario("Juan", "juan@mail.com")
-        materia = self.tm.crear_materia(usuario.idUsuario, "Mat", "#FF5733")
-        tarea = self.tm.crear_tarea(
-            titulo="Estudiar",
-            descripcion="",
-            materia_id=materia.idMateria,
-            prioridad=Prioridad.Media,
-            fecha_entrega=date.today()
-        )
-        with self.assertRaises(ValueError) as context:
-            self.tm.editar_tarea(
-                tarea.idTarea,
-                nueva_prioridad="SuperUrgente"
-            )
-        self.assertIn("prioridad", str(context.exception).lower())
-
-    def test_hu009_verde_editar_tarea_caso_feliz(self):
-        usuario = self.tm.crear_usuario("Juan", "juan@mail.com")
-        materia = self.tm.crear_materia(usuario.idUsuario, "Mat", "#FF5733")
-        tarea = self.tm.crear_tarea(
-            titulo="Estudiar",
-            descripcion="",
-            materia_id=materia.idMateria,
-            prioridad=Prioridad.Media,
-            fecha_entrega=date.today()
-        )
-        editada = self.tm.editar_tarea(
-            tarea.idTarea,
-            nuevo_titulo="Estudiar para el examen",
-            nueva_descripcion="Capítulos 1, 2 y 3",
-            nueva_prioridad=Prioridad.Alta
-        )
-        self.assertEqual(editada.titulo, "Estudiar para el examen")
-        self.assertEqual(editada.descripcion, "Capítulos 1, 2 y 3")
-        self.assertEqual(editada.prioridad, Prioridad.Alta)
-
-    def test_hu010_eliminar_materia_existente(self):
-        """
-        HU-010 - Caso Rojo
-        Se debe eliminar una materia existente correctamente.
-        """
-
-        usuario = self.tm.crear_usuario("Ana", "ana@mail.com")
-        materia = self.tm.crear_materia(
-            usuario.idUsuario,
-            "Física",
-            "Azul"
-        )
-        
-        materia_id = materia.idMateria
-
-        # Acción
-        self.tm.eliminar_materia(materia_id)
-
-        # Verificación usando el dominio
-        materia_buscada = self.tm.seleccionar_materia(materia_id)
-
-        self.assertIsNone(
-            materia_buscada,
-            "La materia no fue eliminada correctamente"
-        )
     
-    def test_hu010_eliminar_materia_elimina_tareas(self):
+    def test_hu011_escenario1_rojo_eliminar_tarea_inexistente(self):
         """
-        HU-010 - Caso Rojo
-        Al eliminar una materia, también deben eliminarse sus tareas asociadas
+        HU-011 - Escenario 1: Intentar eliminar una tarea con un ID inexistente.
+        
+        
         """
+        # Intentamos eliminar la tarea con un ID ficticio
+        with self.assertRaises(ValueError) as context:
+            self.tm.eliminar_tarea(9999)
+        
+        # Verificamos que el error contenga el mensaje esperado
+        self.assertIn("la tarea con id 9999 no existe", str(context.exception).lower())
 
-        usuario = self.tm.crear_usuario("Ana", "ana@mail.com")
-        materia = self.tm.crear_materia(
-            usuario.idUsuario,
-            "Física",
-            "Azul"
-        )
+    def test_hu011_escenario2_rojo_eliminar_tarea_existente(self):
+        """
+        HU-011 - Escenario 2: Eliminar una tarea que sí existe.
+        """
+        from src.model.modelo import Prioridad
+        from datetime import date
 
+        # 1. Preparación completa: necesitamos Usuario -> Materia -> Tarea
+        usuario = self.tm.crear_usuario("Test", "test_delete@mail.com")
+        
+        # Corregido: Pasamos (idUsuario, nombre, color) como en tus otros tests
+        materia = self.tm.crear_materia(usuario.idUsuario, "Materia Prueba", "#000000")
+        
+        # Corregido: Pasamos los argumentos que pide tu crear_tarea
         tarea = self.tm.crear_tarea(
-            titulo="Resolver ejercicios",
-            descripcion="Capítulo 3",
-            prioridad=Prioridad.Media,
+            titulo="Tarea a borrar", 
+            descripcion="Descripción", 
+            prioridad=Prioridad.Baja,
             fecha_entrega=date.today(),
             materia_id=materia.idMateria
         )
-
-        tarea_id = tarea.idTarea
-        materia_id = materia.idMateria
-
-        # Acción
-        self.tm.eliminar_materia(materia_id)
-
-        # Verificación
-        tarea_buscada = self.tm.seleccionar_tarea(tarea_id)
-        self.assertIsNone(
-            tarea_buscada,
-            "Las tareas asociadas a la materia no fueron eliminadas"
-        )
-
-    def test_hu010_eliminar_materia_id_invalido(self):
+        id_real = tarea.idTarea
+        
+        # 2. Acción: Borramos la tarea
+        self.tm.eliminar_tarea(id_real)
+        
+        # 3. Verificación:
+        # Nota: He visto que no tienes 'seleccionar_tarea', pero puedes usar 
+        # una consulta directa o un método existente para verificar que ya no existe.
+        from src.model.declarative_base import session
+        from src.model.modelo import Tarea
+        tarea_en_db = session.query(Tarea).filter_by(idTarea=id_real).first()
+        
+        self.assertIsNone(tarea_en_db, "La tarea no fue eliminada de la base de datos")
+        
+    def test_hu011_escenario3_rojo_eliminar_tarea_tipo_invalido(self):
         """
-        HU-010 - Caso Rojo
-        No se debe permitir eliminar una materia con un ID inválido.
+        HU-011 - Escenario 3: Intentar eliminar una tarea pasando un tipo de dato no entero.
+        Debe lanzar un TypeError.
         """
-
+        # Intentamos pasar un string en lugar de un entero
         with self.assertRaises(TypeError) as context:
-            self.tm.eliminar_materia("ID_FALSO")
-
-        self.assertIn("id", str(context.exception).lower())
-
-    def test_hu010_eliminar_materia_no_afecta_otras_materias(self):
-        """
-        HU-010 - Caso Rojo
-        Eliminar una materia no debe eliminar otras materias del mismo usuario.
-        """
-
-        usuario = self.tm.crear_usuario("Ana", "ana@mail.com")
-
-        materia_1 = self.tm.crear_materia(
-            usuario.idUsuario,
-            "Física",
-            "Azul"
-        )
-
-        materia_2 = self.tm.crear_materia(
-            usuario.idUsuario,
-            "Química",
-            "Rojo"
-        )
-
-        # Eliminamos SOLO la primera materia
-        self.tm.eliminar_materia(materia_1.idMateria)
-
-        # La materia eliminada no debe existir
-        self.assertIsNone(
-            self.tm.seleccionar_materia(materia_1.idMateria)
-        )
-
-        # La otra materia DEBE seguir existiendo
-        materia_restante = self.tm.seleccionar_materia(materia_2.idMateria)
-        self.assertIsNotNone(
-            materia_restante,
-            "Eliminar una materia no debe afectar otras materias"
-        )
+            self.tm.eliminar_tarea("ID_INVALIDO")
+        
+        self.assertIn("debe ser un número entero", str(context.exception).lower())

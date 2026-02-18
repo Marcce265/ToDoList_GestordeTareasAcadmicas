@@ -260,6 +260,7 @@ class TaskManager:
         finally:
             session.close()
 
+
     def eliminar_usuario(self, id_usuario: int):
         """
         Elimina un usuario del sistema por su ID. (Versión Final Completa)
@@ -467,6 +468,8 @@ class TaskManager:
             ).first()
         finally:
             session.close()
+
+
 
 
     def eliminar_tarea(self, id_tarea: int) -> None:
