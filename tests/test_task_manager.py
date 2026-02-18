@@ -603,3 +603,15 @@ class TestTaskManager(unittest.TestCase):
             tarea_buscada,
             "Las tareas asociadas a la materia no fueron eliminadas"
         )
+
+    def test_hu010_eliminar_materia_id_invalido(self):
+        """
+        HU-010 - Caso Rojo
+        No se debe permitir eliminar una materia con un ID inválido.
+        """
+
+        with self.assertRaises(TypeError) as context:
+            self.tm.eliminar_materia("ID_FALSO")
+
+        self.assertIn("id", str(context.exception).lower())
+
