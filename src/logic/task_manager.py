@@ -387,8 +387,20 @@ class TaskManager:
             session.close()
 
     def seleccionar_materia(self, materia_id: int):
+        """
+        HU-010: Obtiene una materia por su ID.
+
+        Args:
+            materia_id: ID de la materia a buscar
+
+        Returns:
+            Materia si existe, None si no existe
+
+        Raises:
+            TypeError: Si el ID no es un entero
+        """
         if not isinstance(materia_id, int):
-            raise TypeError("El ID de la materia debe ser un número")
+            raise TypeError("El ID debe ser un entero")
 
         session = Session()
         try:
@@ -399,6 +411,17 @@ class TaskManager:
             session.close()
 
     def eliminar_materia(self, materia_id: int):
+        """
+        HU-010: Elimina una materia existente.
+
+        También elimina todas las tareas asociadas a la materia.
+
+        Args:
+            materia_id: ID de la materia a eliminar
+
+        Raises:
+            TypeError: Si el ID no es un entero
+        """
 
         if not isinstance(materia_id, int):
             raise TypeError("El ID debe ser un entero")
@@ -422,6 +445,21 @@ class TaskManager:
             session.close()
 
     def seleccionar_tarea(self, tarea_id: int):
+        """
+        HU-010: Obtiene una tarea por su ID.
+
+        Args:
+            tarea_id: ID de la tarea a buscar
+
+        Returns:
+            Tarea si existe, None si no existe
+
+        Raises:
+            TypeError: Si el ID no es un entero
+        """
+        if not isinstance(tarea_id, int):
+            raise TypeError("El ID debe ser un entero")
+
         session = Session()
         try:
             return session.query(Tarea).filter_by(
