@@ -261,28 +261,35 @@ class TaskManager:
         finally:
             session.close()
 
-    def eliminar_tarea(self, id_tarea: int):
+    def eliminar_tarea(self, id_tarea: int) -> None:
         """
-        Elimina una tarea verificando integridad de datos y existencia.
+        Elimina de forma permanente una tarea de la base de datos.
+
+        Args:
+            id_tarea (int): El identificador único de la tarea a eliminar.
+
+        Raises:
+            TypeError: Si el id_tarea no es un número entero.
+            ValueError: Si la tarea no se encuentra en la base de datos.
         """
-        # 1. Validación de tipo (Escenario 3)
+        # Validación de tipo (Defensa temprana)
         if not isinstance(id_tarea, int):
             raise TypeError("El ID de la tarea debe ser un número entero.")
 
+        # Usamos la sesión global o local según tu configuración
         from src.model.declarative_base import session
         from src.model.modelo import Tarea
 
         try:
-            # 2. Búsqueda (Escenario 1)
-            tarea_a_eliminar = session.query(Tarea).filter_by(idTarea=id_tarea).first()
+            # Buscamos la tarea directamente
+            tarea = session.query(Tarea).filter_by(idTarea=id_tarea).first()
 
-            if not tarea_a_eliminar:
+            if not tarea:
                 raise ValueError(f"La tarea con id {id_tarea} no existe")
-            
-            # 3. Borrado (Escenario 2)
-            session.delete(tarea_a_eliminar)
+
+            session.delete(tarea)
             session.commit()
-                
-        except Exception as e:
+            
+        except Exception:
             session.rollback()
-            raise e
+            raise  # Re-lanza la excepción original sin alterar el traceback
