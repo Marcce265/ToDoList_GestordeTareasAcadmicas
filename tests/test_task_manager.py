@@ -2,7 +2,7 @@ from datetime import date
 import unittest
 from src.logic.task_manager import TaskManager
 from src.model.declarative_base import Base, engine
-from src.model.modelo import Usuario  # Importamos para aserciones
+from src.model.modelo import Prioridad, Usuario  # Importamos para aserciones
 
 
 class TestTaskManager(unittest.TestCase):
@@ -357,4 +357,209 @@ class TestTaskManager(unittest.TestCase):
         )
         self.assertEqual(editado.nombre, "Juan Carlos")
         self.assertEqual(editado.correo, "juancarlos@mail.com")
-    
+
+    def test_hu007_escenario1_rojo_eliminar_usuario_inexistente(self):
+        """
+        HU-007 - Escenario 1: Intentar eliminar un usuario que no existe.
+        Debe lanzar un ValueError.
+        """
+        # Intentamos eliminar un ID fantasma
+        with self.assertRaises(ValueError) as context:
+            self.tm.eliminar_usuario(999)
+
+        # Verificamos que el error nos avise que no existe
+        self.assertIn("no existe", str(context.exception).lower())
+
+    def test_hu007_escenario2_rojo_eliminar_usuario_existente(self):
+        """
+        HU-007 - Escenario 2: Eliminar un usuario que sí existe.
+        El usuario debe desaparecer de la base de datos.
+        """
+        # 1. Preparación: Creamos un usuario válido con nombre y CORREO
+        usuario_nuevo = self.tm.crear_usuario(
+            "Usuario a Eliminar", "eliminar@prueba.com")
+        id_real = usuario_nuevo.idUsuario
+
+        # 2. Acción: Lo eliminamos usando el método del dominio
+        self.tm.eliminar_usuario(id_real)
+
+        # 3. Aserción: Lo buscamos de nuevo. Debería darnos None.
+        usuario_buscado = self.tm.seleccionar_usuario(id_real)
+        self.assertIsNone(
+            usuario_buscado, "El usuario aún existe en la BD, no fue eliminado")
+
+    def test_hu007_escenario3_rojo_eliminar_usuario_id_invalido(self):
+        """
+        HU-007 - Escenario 3: Intentar eliminar un usuario enviando un ID 
+        que no es un número (por ejemplo, un texto).
+        Debe lanzar un TypeError o ValueError.
+        """
+        # Enviamos un texto en lugar de un ID numérico
+        with self.assertRaises(TypeError) as context:
+            self.tm.eliminar_usuario("ID_FALSO_ABC")
+
+        # Verificamos que el error nos hable sobre el tipo de dato
+        self.assertIn("debe ser un número", str(context.exception).lower())
+
+    def test_hu008_rojo_editar_materia_inexistente(self):
+        """
+        HU-008 - Escenario 1 (Rojo)
+        No se debe permitir editar una materia que no existe.
+        """
+
+        # Intentamos editar una materia con ID inexistente
+        with self.assertRaises(ValueError) as context:
+            self.tm.editar_materia(
+                9999,  # ID que no existe
+                nuevo_nombre="Nueva Materia"
+            )
+
+        # Verificamos que el mensaje mencione que la materia no existe
+        self.assertIn("materia", str(context.exception).lower())
+
+    def test_hu008_rojo_editar_materia_nombre_vacio(self):
+        """
+        HU-008 - Escenario 2 (Rojo)
+        No se debe permitir editar una materia con nombre vacío.
+        """
+
+        # 1️⃣ Preparación: Crear usuario y materia válida
+        usuario = self.tm.crear_usuario("Laura", "laura@mail.com")
+        materia = self.tm.crear_materia(
+            usuario.idUsuario,
+            "Biología",
+            "Verde"
+        )
+
+        # 2️⃣ Acción y Aserción: Intentar editar con nombre vacío
+        with self.assertRaises(ValueError) as context:
+            self.tm.editar_materia(
+                materia.idMateria,
+                nuevo_nombre=""  # ❌ nombre vacío
+            )
+
+        # 3️⃣ Verificamos que el error mencione el problema
+        self.assertIn("nombre", str(context.exception).lower())
+
+    def test_hu008_rojo_editar_materia_correctamente(self):
+        """
+        HU-008 - Escenario 3 (Rojo)
+        Editar correctamente el nombre y color de una materia existente.
+        """
+
+        # 1️⃣ Preparación
+        usuario = self.tm.crear_usuario("Mario", "mario@mail.com")
+        materia = self.tm.crear_materia(
+            usuario.idUsuario,
+            "Geografía",
+            "Azul"
+        )
+
+        # 2️⃣ Acción
+        materia_editada = self.tm.editar_materia(
+            materia.idMateria,
+            nuevo_nombre="Geografía Mundial",
+            nuevo_color="Rojo"
+        )
+
+        # 3️⃣ Aserciones
+        self.assertEqual(materia_editada.nombre, "Geografía Mundial")
+        self.assertEqual(materia_editada.color, "Rojo")
+
+    def test_hu009_rojo_editar_tarea_titulo_vacio(self):
+        usuario = self.tm.crear_usuario("Juan", "juan@mail.com")
+        materia = self.tm.crear_materia(usuario.idUsuario, "Mat", "#FF5733")
+
+        tarea = self.tm.crear_tarea(
+            titulo="Estudiar",
+            descripcion="",
+            materia_id=materia.idMateria,
+            prioridad=Prioridad.Media,
+            fecha_entrega=date.today()
+        )
+
+        with self.assertRaises(ValueError) as context:
+            self.tm.editar_tarea(
+                tarea.idTarea, nuevo_titulo=""
+            )
+
+        self.assertIn("título", str(context.exception).lower())
+
+    def test_hu009_rojo_editar_tarea_titulo_solo_espacios(self):
+        usuario = self.tm.crear_usuario("Juan", "juan@mail.com")
+        materia = self.tm.crear_materia(usuario.idUsuario, "Mat", "#FF5733")
+        tarea = self.tm.crear_tarea(
+            titulo="Estudiar",
+            descripcion="",
+            materia_id=materia.idMateria,
+            prioridad=Prioridad.Media,
+            fecha_entrega=date.today()
+        )
+        with self.assertRaises(ValueError) as context:
+            self.tm.editar_tarea(
+                tarea.idTarea, nuevo_titulo="   "
+            )
+        self.assertIn("título", str(context.exception).lower())
+
+    def test_hu009_rojo_editar_tarea_prioridad_invalida(self):
+        usuario = self.tm.crear_usuario("Juan", "juan@mail.com")
+        materia = self.tm.crear_materia(usuario.idUsuario, "Mat", "#FF5733")
+        tarea = self.tm.crear_tarea(
+            titulo="Estudiar",
+            descripcion="",
+            materia_id=materia.idMateria,
+            prioridad=Prioridad.Media,
+            fecha_entrega=date.today()
+        )
+        with self.assertRaises(ValueError) as context:
+            self.tm.editar_tarea(
+                tarea.idTarea,
+                nueva_prioridad="SuperUrgente"
+            )
+        self.assertIn("prioridad", str(context.exception).lower())
+
+    def test_hu009_verde_editar_tarea_caso_feliz(self):
+        usuario = self.tm.crear_usuario("Juan", "juan@mail.com")
+        materia = self.tm.crear_materia(usuario.idUsuario, "Mat", "#FF5733")
+        tarea = self.tm.crear_tarea(
+            titulo="Estudiar",
+            descripcion="",
+            materia_id=materia.idMateria,
+            prioridad=Prioridad.Media,
+            fecha_entrega=date.today()
+        )
+        editada = self.tm.editar_tarea(
+            tarea.idTarea,
+            nuevo_titulo="Estudiar para el examen",
+            nueva_descripcion="Capítulos 1, 2 y 3",
+            nueva_prioridad=Prioridad.Alta
+        )
+        self.assertEqual(editada.titulo, "Estudiar para el examen")
+        self.assertEqual(editada.descripcion, "Capítulos 1, 2 y 3")
+        self.assertEqual(editada.prioridad, Prioridad.Alta)
+
+    def test_hu010_eliminar_materia_existente(self):
+        """
+        HU-010 - Caso Rojo
+        Se debe eliminar una materia existente correctamente.
+        """
+
+        usuario = self.tm.crear_usuario("Ana", "ana@mail.com")
+        materia = self.tm.crear_materia(
+            usuario.idUsuario,
+            "Física",
+            "Azul"
+        )
+        
+        materia_id = materia.idMateria
+
+        # Acción
+        self.tm.eliminar_materia(materia_id)
+
+        # Verificación usando el dominio
+        materia_buscada = self.tm.seleccionar_materia(materia_id)
+
+        self.assertIsNone(
+            materia_buscada,
+            "La materia no fue eliminada correctamente"
+        )
