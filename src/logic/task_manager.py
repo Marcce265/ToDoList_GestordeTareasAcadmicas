@@ -263,19 +263,22 @@ class TaskManager:
 
     def eliminar_tarea(self, id_tarea: int):
         """
-        HU-011 - Escenario 1: Lógica para intentar eliminar una tarea.
+        Elimina una tarea por su ID.
         """
-        
-        session = Session()
-        try:
-            # Buscamos la tarea en la tabla Tarea
-            tarea_a_eliminar = session.query(Tarea).filter_by(idTarea=id_tarea).first()
+        from src.model.declarative_base import session
+        from src.model.modelo import Tarea
 
-            # Si no se encuentra, lanzamos la excepción que el test espera
-            if not tarea_a_eliminar:
-                raise ValueError(f"La tarea con ID {id_tarea} no existe.")
-            
-            # (El código para borrar lo completaremos en el Escenario 2)
-            
-        finally:
-            session.close()
+        # 1. Buscar la tarea
+        tarea_a_eliminar = session.query(Tarea).filter_by(idTarea=id_tarea).first()
+
+        # 2. Si no existe, lanzamos el error que espera el Escenario 1
+        if not tarea_a_eliminar:
+            raise ValueError(f"La tarea con id {id_tarea} no existe")
+        
+        # 3. Si existe, la borramos
+        try:
+            session.delete(tarea_a_eliminar)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e

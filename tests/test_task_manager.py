@@ -374,17 +374,34 @@ class TestTaskManager(unittest.TestCase):
     def test_hu011_escenario2_rojo_eliminar_tarea_existente(self):
         """
         HU-011 - Escenario 2: Eliminar una tarea que sí existe.
-        
         """
-        # 1. Preparación: Creamos materia y tarea (ajusta según tus funciones reales)
-        materia = self.tm.crear_materia("Materia de Prueba", "#000000")
-        tarea = self.tm.crear_tarea("Tarea a borrar", "Descripción", materia.idMateria)
+        from src.model.modelo import Prioridad
+        from datetime import date
+
+        # 1. Preparación completa: necesitamos Usuario -> Materia -> Tarea
+        usuario = self.tm.crear_usuario("Test", "test_delete@mail.com")
+        
+        # Corregido: Pasamos (idUsuario, nombre, color) como en tus otros tests
+        materia = self.tm.crear_materia(usuario.idUsuario, "Materia Prueba", "#000000")
+        
+        # Corregido: Pasamos los argumentos que pide tu crear_tarea
+        tarea = self.tm.crear_tarea(
+            titulo="Tarea a borrar", 
+            descripcion="Descripción", 
+            prioridad=Prioridad.Baja,
+            fecha_entrega=date.today(),
+            materia_id=materia.idMateria
+        )
         id_real = tarea.idTarea
         
         # 2. Acción: Borramos la tarea
         self.tm.eliminar_tarea(id_real)
         
-        # 3. Verificación: Buscamos la tarea por ID. Debería retornar None.
-        # (Asumo que tienes una función seleccionar_tarea o similar)
-        tarea_buscada = self.tm.seleccionar_tarea(id_real) 
-        self.assertIsNone(tarea_buscada, "La tarea no fue eliminada de la base de datos")
+        # 3. Verificación:
+        # Nota: He visto que no tienes 'seleccionar_tarea', pero puedes usar 
+        # una consulta directa o un método existente para verificar que ya no existe.
+        from src.model.declarative_base import session
+        from src.model.modelo import Tarea
+        tarea_en_db = session.query(Tarea).filter_by(idTarea=id_real).first()
+        
+        self.assertIsNone(tarea_en_db, "La tarea no fue eliminada de la base de datos")
