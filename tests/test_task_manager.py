@@ -563,3 +563,62 @@ class TestTaskManager(unittest.TestCase):
             materia_buscada,
             "La materia no fue eliminada correctamente"
         )
+        
+    def test_hu011_escenario1_rojo_eliminar_tarea_inexistente(self):
+        """
+        HU-011 - Escenario 1: Intentar eliminar una tarea con un ID inexistente.
+        
+        
+        """
+        # Intentamos eliminar la tarea con un ID ficticio
+        with self.assertRaises(ValueError) as context:
+            self.tm.eliminar_tarea(9999)
+        
+        # Verificamos que el error contenga el mensaje esperado
+        self.assertIn("la tarea con id 9999 no existe", str(context.exception).lower())
+
+    def test_hu011_escenario2_rojo_eliminar_tarea_existente(self):
+        """
+        HU-011 - Escenario 2: Eliminar una tarea que sí existe.
+        """
+        from src.model.modelo import Prioridad
+        from datetime import date
+
+        # 1. Preparación completa: necesitamos Usuario -> Materia -> Tarea
+        usuario = self.tm.crear_usuario("Test", "test_delete@mail.com")
+        
+        # Corregido: Pasamos (idUsuario, nombre, color) como en tus otros tests
+        materia = self.tm.crear_materia(usuario.idUsuario, "Materia Prueba", "#000000")
+        
+        # Corregido: Pasamos los argumentos que pide tu crear_tarea
+        tarea = self.tm.crear_tarea(
+            titulo="Tarea a borrar", 
+            descripcion="Descripción", 
+            prioridad=Prioridad.Baja,
+            fecha_entrega=date.today(),
+            materia_id=materia.idMateria
+        )
+        id_real = tarea.idTarea
+        
+        # 2. Acción: Borramos la tarea
+        self.tm.eliminar_tarea(id_real)
+        
+        # 3. Verificación:
+        # Nota: He visto que no tienes 'seleccionar_tarea', pero puedes usar 
+        # una consulta directa o un método existente para verificar que ya no existe.
+        from src.model.declarative_base import session
+        from src.model.modelo import Tarea
+        tarea_en_db = session.query(Tarea).filter_by(idTarea=id_real).first()
+        
+        self.assertIsNone(tarea_en_db, "La tarea no fue eliminada de la base de datos")
+        
+    def test_hu011_escenario3_rojo_eliminar_tarea_tipo_invalido(self):
+        """
+        HU-011 - Escenario 3: Intentar eliminar una tarea pasando un tipo de dato no entero.
+        Debe lanzar un TypeError.
+        """
+        # Intentamos pasar un string en lugar de un entero
+        with self.assertRaises(TypeError) as context:
+            self.tm.eliminar_tarea("ID_INVALIDO")
+        
+        self.assertIn("debe ser un número entero", str(context.exception).lower())
