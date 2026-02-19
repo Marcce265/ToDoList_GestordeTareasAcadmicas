@@ -1,0 +1,13 @@
+[run]
+omit =
+    src/__init__.py
+    src/logic/__init__.py
+    src/model/__init__.py
+    tests/__init__.py
+
+[report]
+omit =
+    src/__init__.py
+    src/logic/__init__.py
+    src/model/__init__.py
+    tests/__init__.py
