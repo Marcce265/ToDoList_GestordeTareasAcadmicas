@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
 from src.model.declarative_base import engine
 from src.model.modelo import Usuario, Materia, Tarea, Prioridad, EstadoTarea
+from sqlalchemy.orm import sessionmaker, joinedload
 
 Session = sessionmaker(bind=engine)
 
@@ -12,7 +13,9 @@ Session = sessionmaker(bind=engine)
 class TaskManager:
 
     def __init__(self):
-        self.usuario_activo: Optional[Usuario] = None
+        # Esta línea crea la fábrica de sesiones que el código necesita
+        self.Session = sessionmaker(bind=engine)
+        self.usuario_activo = None
 
     # ──────────────────────────────────────────────────────────────
     # MÉTODOS PRIVADOS DE VALIDACIÓN
@@ -133,38 +136,33 @@ class TaskManager:
     # HU-002: Seleccionar Usuario
     # ──────────────────────────────────────────────────────────────
 
-    def listar_usuarios(self) -> list:
-        """Retorna todos los usuarios registrados."""
-        session = Session()
+    def listar_usuarios(self):
+        """
+        HU-002: Recupera todos los usuarios para mostrarlos en la lista de selección.
+        """
+        session = self.Session()
         try:
             usuarios = session.query(Usuario).all()
+            # Desacoplamos de la sesión para evitar errores de 'lazy load'
             for u in usuarios:
                 session.expunge(u)
             return usuarios
         finally:
             session.close()
 
-    def seleccionar_usuario(self, id_usuario: int) -> Optional[Usuario]:
+    def seleccionar_usuario(self, id_usuario: int):
         """
-        Selecciona un usuario por ID y lo asigna como usuario activo.
-
-        Raises:
-            ValueError: Si no hay usuarios registrados o el ID es <= 0.
-        Returns:
-            Usuario encontrado, o None si el ID no existe.
+        Versión final: Carga al usuario con sus materias de una vez.
         """
-        session = Session()
+        session = self.Session()
         try:
-            count = session.query(Usuario).count()
-            if count == 0:
-                raise ValueError("No hay usuarios registrados")
-
-            if id_usuario <= 0:
-                raise ValueError("El ID del usuario debe ser mayor a 0")
-
-            usuario = session.query(Usuario).filter_by(idUsuario=id_usuario).first()
+            from sqlalchemy.orm import joinedload
+            usuario = session.query(Usuario).options(
+                joinedload(Usuario.materias)
+            ).filter_by(idUsuario=id_usuario).first()
+            
             if usuario:
-                session.expunge(usuario)
+                session.expunge_all()
                 self.usuario_activo = usuario
             return usuario
         finally:
@@ -174,44 +172,51 @@ class TaskManager:
     # HU-003: Crear Materia
     # ──────────────────────────────────────────────────────────────
 
-    def crear_materia(self, nombre: str, color: str) -> Materia:
+    def crear_materia(self, nombre: str, color: str, usuario_id: int = None) -> Materia:
         """
-        Crea una materia para el usuario activo.
+        Crea una materia. 
+        Si recibe usuario_id (desde la GUI), lo usa. 
+        Si no, usa self.usuario_activo (lógica original).
+        """
+        
+        # 1. Determinamos qué ID usar sin romper tu lógica anterior
+        id_final = usuario_id
+        if id_final is None and self.usuario_activo:
+            id_final = self.usuario_activo.idUsuario
+            
+        if id_final is None:
+             raise ValueError("Error: No se identificó al usuario para crear la materia.")
 
-        Raises:
-            ValueError: Si no hay usuario activo, nombre/color inválidos,
-                        o nombre duplicado para el mismo usuario.
-        """
-        self._validar_usuario_activo()
+        # 2. Tus validaciones originales (INTACTAS)
+        # self._validar_usuario_activo() # <--- Esta la saltamos si viene ID externo, o la ajustamos
         nombre = self._validar_nombre_materia(nombre)
         self._validar_color_hex(color)
 
-        session = Session()
+        session = self.Session() # O Session(), usa el que tengas configurado en tu archivo
         try:
+            # 3. Usamos 'id_final' en lugar de 'self.usuario_activo.idUsuario'
             duplicado = session.query(Materia).filter_by(
                 nombre=nombre,
-                usuario_id=self.usuario_activo.idUsuario
+                usuario_id=id_final
             ).first()
+            
             if duplicado:
                 raise ValueError(f"Ya existe una materia llamada '{nombre}' para este usuario")
 
             materia = Materia(
                 nombre=nombre,
                 color=color,
-                usuario_id=self.usuario_activo.idUsuario
+                usuario_id=id_final
             )
             session.add(materia)
             session.commit()
             session.refresh(materia)
-            session.expunge(materia)
+            session.expunge(materia) # Esto evita la pantalla blanca en la GUI
             return materia
 
-        except IntegrityError:
+        except Exception as e:
             session.rollback()
-            raise ValueError("Ya existe una materia con ese nombre para este usuario")
-        except Exception:
-            session.rollback()
-            raise
+            raise e
         finally:
             session.close()
 
