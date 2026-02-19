@@ -6,23 +6,22 @@ Uso: python ui_usuarios.py
 import flet as ft
 from src.logic.task_manager import TaskManager
 
-# ── Paleta ──────────────────────────────────────────────
-BG      = "#F5F7FB"   # Fondo general clarito
-SURFACE = "#E9EEF6"   # Sidebar suave
-CARD    = "#FFFFFF"   # Tarjetas blancas
-BORDER  = "#D6DEEB"   # Bordes suaves
-INK     = "#1E293B"   # Texto principal
-MUTED   = "#64748B"   # Texto secundario
-ACCENT  = "#2563EB"   # Azul universitario moderno
-DANGER  = "#DC2626"
-ERR_BG  = "#FEE2E2"
-ERR_FG  = "#B91C1C"
-OK_BG   = "#DCFCE7"
-OK_FG   = "#15803D"
-WARN_BG = "#FEF3C7"
-WARN_FG = "#B45309"
+# ── Paleta MORADO MINIMALISTA ──────────────────────────────
+BG      = "#FAFBFC"   # Fondo blanco suave
+SURFACE = "#F5F3FF"   # Sidebar morado clarísimo
+CARD    = "#FFFFFF"   # Tarjetas blancas puras
+BORDER  = "#E9D5FF"   # Bordes morado pastel
+INK     = "#1F1B2E"   # Texto principal oscuro
+MUTED   = "#8B7CA8"   # Texto secundario morado grisáceo
+ACCENT  = "#8B5CF6"   # Morado vibrante (violet-500)
+ACCENT2 = "#A78BFA"   # Morado más claro (violet-400)
+DANGER  = "#EC4899"   # Rosa/magenta en lugar de rojo
+ERR_BG  = "#FCE7F3"   # Rosa pastel
+ERR_FG  = "#AD1010"   # Rosa oscuro
+WARN_BG = "#FEF3C7"   # Amarillo pastel
+WARN_FG = "#D97706"   # Ámbar
 FONT    = "Segoe UI"
-AVATARES = ["🎓","👩‍💼","👨‍💻","📚","🧑‍🎓"]
+AVATARES = ["🎓","👩‍💼","👨‍💻","📚","🧑‍🎓","✨","💜","🌸"]
 
 
 # ── Helpers ─────────────────────────────────────────────
@@ -39,7 +38,7 @@ def T(text, size=13, color=INK, weight=ft.FontWeight.NORMAL,
 def banner_ctrl(text, kind="error"):
     cfg = {
         "error":   (ERR_BG,  ERR_FG,  "✕  "),
-        "success": (OK_BG,   OK_FG,   "✓  "),
+        "success": (ACCENT.replace("#", "#15"), ACCENT, "✓  "),
         "warn":    (WARN_BG, WARN_FG, "⚠  "),
     }
     bg, fg, icon = cfg[kind]
@@ -98,15 +97,26 @@ def tfield(label, hint="", value=""):
     )
 
 def small_icon_btn(icon, color, on_click, tooltip=""):
+    """
+    Botón de icono pequeño con estilo minimalista.
+    Usa fondo muy sutil y color solo en el icono.
+    """
     return ft.Container(
-        content=ft.Icon(icon, size=15, color=color),
-        width=30, height=30,
-        border_radius=6,
-        bgcolor=f"{color}18",
+        content=ft.Icon(icon, size=16, color=color),
+        width=34, height=34,
+        border_radius=8,
+        bgcolor="#FFFFFF",  # Fondo blanco
+        border=_ball(BORDER, 1),  # Borde sutil
         alignment=ft.Alignment(0, 0),
         on_click=on_click,
         ink=True,
         tooltip=tooltip,
+        shadow=ft.BoxShadow(
+            blur_radius=4,
+            spread_radius=0,
+            color="#00000008",
+            offset=ft.Offset(0, 2)
+        ),
     )
 
 
@@ -284,15 +294,16 @@ def main(page: ft.Page):
 
         return ft.Container(
             content=ft.Row([
-                # Avatar
+                # Avatar con fondo BLANCO
                 ft.Container(
                     content=ft.Text(emoji, size=22),
                     width=46, height=46,
-                    bgcolor=f"{ACCENT}20",
+                    bgcolor="#FFFFFF",  # ← BLANCO en lugar de color
                     border_radius=23,
                     alignment=ft.Alignment(0, 0),
-                    border=_ball(f"{ACCENT}40", 1),
+                    border=_ball(BORDER, 1.5),  # ← Borde morado suave
                 ),
+            # ... resto igual
                 # Info
                 ft.Column([
                     T(u.nombre, size=14, weight=ft.FontWeight.W_700),
@@ -336,15 +347,15 @@ def main(page: ft.Page):
     def build_bienvenida():
         btn_crear = ft.Container(
             content=ft.Row([
-                ft.Icon(ft.Icons.ADD, color=ACCENT, size=16),
+                ft.Icon(ft.Icons.ADD, color="#FFFFFF", size=16),
                 T("CREAR NUEVO USUARIO", size=12,
-                  weight=ft.FontWeight.W_700, color=ACCENT),
+                weight=ft.FontWeight.W_700, color="#FFFFFF"),
             ], alignment=ft.MainAxisAlignment.CENTER, spacing=8),
-            border=_ball(ACCENT, 1.5),
+            bgcolor=ACCENT,  # ← morado sólido
             border_radius=12,
             padding=ft.Padding(0, 14, 0, 14),
-            on_click=dlg_open, ink=True,
-            bgcolor=f"{ACCENT}20",
+            on_click=dlg_open,
+            ink=True,
         )
 
         return ft.Column([
@@ -392,7 +403,7 @@ def main(page: ft.Page):
                   weight=ft.FontWeight.W_600 if active
                   else ft.FontWeight.NORMAL),
             ], spacing=10),
-            bgcolor=f"{ACCENT}18" if active else "transparent",
+            bgcolor=ACCENT.replace("#", "#18") if active else "transparent",
             border_radius=10,
             padding=ft.Padding(14, 10, 14, 10),
             on_click=lambda e, i=idx: _nav_to(i),
@@ -413,20 +424,27 @@ def main(page: ft.Page):
         _show_seccion(idx)
 
     def _show_seccion(idx):
-        labels = [("Materias", ft.Icons.BOOK_OUTLINED, "#6C63FF"),
-                  ("Tareas",   ft.Icons.CHECKLIST_OUTLINED, "#4ECBA0")]
-        lbl, ico, col = labels[idx]
+        labels = [
+            ("Materias", ft.Icons.BOOK_OUTLINED),
+            ("Tareas",   ft.Icons.CHECKLIST_OUTLINED),
+        ]
+
+        lbl, ico = labels[idx]
+
         _dash_body.controls = [
             ft.Container(
                 content=ft.Column([
-                    ft.Icon(ico, color=f"{col}55", size=48),
+                    ft.Icon(ico, color=ACCENT.replace("#", "#55"), size=48),
                     ft.Container(height=12),
-                    T(lbl, size=20, weight=ft.FontWeight.BOLD,
-                      align=ft.TextAlign.CENTER),
+                    T(lbl, size=20,
+                    weight=ft.FontWeight.BOLD,
+                    align=ft.TextAlign.CENTER),
                     T("Esta sección se implementará en el siguiente bloque.",
-                      size=13, color=MUTED, align=ft.TextAlign.CENTER),
-                ], horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                   spacing=6),
+                    size=13, color=MUTED,
+                    align=ft.TextAlign.CENTER),
+                ],
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=6),
                 alignment=ft.Alignment(0, 0),
                 expand=True,
             )
@@ -438,11 +456,12 @@ def main(page: ft.Page):
     _av_txt   = ft.Text("🎓", size=20)
     _uname    = T("—", size=14, weight=ft.FontWeight.W_700)
     _uemail   = T("—", size=11, color=MUTED)
-    _av_cont  = ft.Container(
+    _av_cont = ft.Container(
         content=_av_txt, width=40, height=40,
-        bgcolor=f"{ACCENT}25", border_radius=20,
+        bgcolor="#FFFFFF",  # ← BLANCO
+        border_radius=20,
         alignment=ft.Alignment(0, 0),
-        border=_ball(f"{ACCENT}50", 1),
+        border=_ball(BORDER, 1.5),  # ← Borde morado suave
     )
 
     def _refresh_sidebar_user():
@@ -596,9 +615,10 @@ def main(page: ft.Page):
                                 T("Eliminar", size=11, color=DANGER),
                             ], spacing=5),
                             on_click=dash_del_open,
-                            ink=True, border_radius=7,
+                            ink=True,
+                            border_radius=7,
                             padding=ft.Padding(10, 6, 10, 6),
-                            bgcolor=f"{DANGER}12",
+                            bgcolor=f"{DANGER}15",
                             tooltip="Eliminar cuenta",
                         ),
                     ], spacing=6),
@@ -606,13 +626,14 @@ def main(page: ft.Page):
                     ft.Container(
                         content=ft.Row([
                             ft.Icon(ft.Icons.LOGOUT,
-                                    size=13, color=MUTED),
-                            T("Cerrar sesión", size=11, color=MUTED),
+                                    size=13, color=ACCENT),
+                            T("Cerrar sesión", size=11, color=ACCENT),
                         ], spacing=6),
                         on_click=lambda e: ir_bienvenida(),
-                        ink=True, border_radius=7,
+                        ink=True,
+                        border_radius=7,
                         padding=ft.Padding(10, 6, 10, 6),
-                        bgcolor=f"{MUTED}0A",
+                        bgcolor=ACCENT.replace("#", "#12"),
                     ),
                 ], spacing=0),
                 padding=ft.Padding(12, 14, 12, 16),
