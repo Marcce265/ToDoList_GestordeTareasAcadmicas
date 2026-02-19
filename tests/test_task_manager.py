@@ -47,7 +47,7 @@ class TestHU001CrearUsuario(unittest.TestCase):
     def test_rojo_limite_cinco_usuarios(self):
         """No se deben crear más de 5 usuarios."""
         for i in range(5):
-            self.tm.crear_usuario(f"Usuario{i}Nombre", f"user{i}@mail.com")
+            self.tm.crear_usuario(f"UsuarioNombre{chr(65+i)}", f"user{i}@mail.com")
         with self.assertRaises(ValueError) as ctx:
             self.tm.crear_usuario("Sexto Usuario", "sexto@mail.com")
         self.assertIn("límite", str(ctx.exception).lower())
@@ -122,7 +122,7 @@ class TestHU001CrearUsuario(unittest.TestCase):
 
     def test_rojo_correo_muy_largo(self):
         """Correo con más de 100 caracteres debe lanzar ValueError."""
-        correo_largo = "a" * 90 + "@mail.com"
+        correo_largo = "a" * 92 + "@mail.com"
         with self.assertRaises(ValueError) as ctx:
             self.tm.crear_usuario("Juan Lopez", correo_largo)
         self.assertIn("correo", str(ctx.exception).lower())
@@ -584,15 +584,19 @@ class TestHU007EliminarUsuario(unittest.TestCase):
 
     def test_rojo_eliminar_dos_veces(self):
         """Eliminar usuario ya eliminado debe lanzar ValueError."""
-        self.tm.eliminar_usuario(self.usuario.idUsuario)
-
-        # Crear otro usuario para poder operar
+        # Crear segundo usuario ANTES de eliminar
         nuevo = self.tm.crear_usuario("Ana Torres", "ana@mail.com")
+    
+        id_eliminado = self.usuario.idUsuario
+        self.tm.eliminar_usuario(id_eliminado)
+
         self.tm.seleccionar_usuario(nuevo.idUsuario)
 
         with self.assertRaises(ValueError) as ctx:
-            self.tm.eliminar_usuario(self.usuario.idUsuario)
-        self.assertIn("propio", str(ctx.exception).lower())
+            self.tm.eliminar_usuario(id_eliminado)
+        self.assertIn("usuario", str(ctx.exception).lower())
+
+        
 
     def test_rojo_id_tipo_invalido(self):
         """ID de tipo string debe lanzar TypeError."""
