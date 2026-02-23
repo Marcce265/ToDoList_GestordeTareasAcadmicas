@@ -1,3 +1,22 @@
+"""
+test_task_manager.py
+====================
+Suite de pruebas unitarias para el proyecto TaskMaster Student.
+
+Cubre las Historias de Usuario HU-001 a HU-011, verificando tanto los
+casos de error esperados (casos rojos) como los flujos exitosos (casos verdes).
+
+Convención de nomenclatura:
+    - test_rojo_*: Prueba que una operación inválida lanza la excepción correcta.
+    - test_verde_*: Prueba que una operación válida produce el resultado esperado.
+
+Ejecución:
+    py -m unittest tests.test_task_manager
+
+Cada clase de prueba reinicia la base de datos en su setUp,
+garantizando aislamiento total entre tests.
+"""
+
 from datetime import date, timedelta
 import unittest
 from src.logic.task_manager import TaskManager
@@ -10,18 +29,66 @@ from src.model.modelo import Prioridad, EstadoTarea, Usuario, Materia, Tarea
 # ══════════════════════════════════════════════════════════════════
 
 def crear_usuario_helper(tm: TaskManager, nombre="Juan Lopez", correo="juan@mail.com") -> Usuario:
+    """
+    Crea un usuario con datos por defecto para uso en pruebas.
+
+    Args:
+        tm     (TaskManager): Instancia del gestor de tareas.
+        nombre (str):         Nombre del usuario (por defecto "Juan Lopez").
+        correo (str):         Correo del usuario (por defecto "juan@mail.com").
+
+    Returns:
+        Usuario: El usuario creado y persistido en la BD de prueba.
+    """
     return tm.crear_usuario(nombre, correo)
 
 
 def seleccionar_usuario_helper(tm: TaskManager, usuario: Usuario) -> Usuario:
+    """
+    Selecciona un usuario existente como usuario activo.
+
+    Args:
+        tm      (TaskManager): Instancia del gestor de tareas.
+        usuario (Usuario):     Objeto usuario cuyo ID se usará para seleccionar.
+
+    Returns:
+        Usuario: El usuario seleccionado (ahora es tm.usuario_activo).
+    """
     return tm.seleccionar_usuario(usuario.idUsuario)
 
 
 def crear_materia_helper(tm: TaskManager, nombre="Matemáticas", color="#FF5733") -> Materia:
+    """
+    Crea una materia con datos por defecto para uso en pruebas.
+
+    Requiere que tm.usuario_activo esté establecido previamente.
+
+    Args:
+        tm     (TaskManager): Instancia del gestor de tareas con usuario activo.
+        nombre (str):         Nombre de la materia (por defecto "Matemáticas").
+        color  (str):         Color HEX de la materia (por defecto "#FF5733").
+
+    Returns:
+        Materia: La materia creada y persistida en la BD de prueba.
+    """
     return tm.crear_materia(nombre, color)
 
 
 def crear_tarea_helper(tm: TaskManager, materia_id: int, titulo="Estudiar capítulo uno") -> Tarea:
+    """
+    Crea una tarea con datos por defecto para uso en pruebas.
+
+    La tarea se crea con prioridad Media, descripción genérica y
+    fecha de entrega igual a hoy. Requiere usuario activo.
+
+    Args:
+        tm         (TaskManager): Instancia del gestor con usuario activo.
+        materia_id (int):         ID de la materia a la que se asociará la tarea.
+        titulo     (str):         Título de la tarea (por defecto "Estudiar capítulo uno").
+
+    Returns:
+        Tarea: La tarea creada, con estado inicial Pendiente.
+    """
     return tm.crear_tarea(
         titulo=titulo,
         descripcion="Descripción de prueba",
@@ -36,11 +103,23 @@ def crear_tarea_helper(tm: TaskManager, materia_id: int, titulo="Estudiar capít
 # ══════════════════════════════════════════════════════════════════
 
 class TestHU001CrearUsuario(unittest.TestCase):
+    """
+    Pruebas unitarias para HU-001: Crear Usuario.
+
+    Verifica las validaciones de nombre y correo, el límite máximo
+    de 5 usuarios, la detección de correos duplicados y la creación
+    exitosa de un usuario con datos válidos.
+    """
 
     def setUp(self):
+        """Reinicia la BD y crea una instancia limpia de TaskManager."""
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         self.tm = TaskManager()
+    
+    def tearDown(self):
+        """Limpia la BD después de cada test para evitar datos residuales."""
+        Base.metadata.drop_all(engine)
 
     # ── CASOS ROJOS ───────────────────────────────────────────────
 
@@ -161,11 +240,22 @@ class TestHU001CrearUsuario(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════
 
 class TestHU002SeleccionarUsuario(unittest.TestCase):
+    """
+    Pruebas unitarias para HU-002: Seleccionar Usuario.
+
+    Verifica el manejo de IDs inválidos, inexistentes y la correcta
+    asignación del usuario activo al seleccionar un ID existente.
+    """
 
     def setUp(self):
+        """Reinicia la BD y crea una instancia limpia de TaskManager."""
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         self.tm = TaskManager()
+
+    def tearDown(self):
+        """Limpia la BD después de cada test para evitar datos residuales."""
+        Base.metadata.drop_all(engine)
 
     # ── CASOS ROJOS ───────────────────────────────────────────────
 
@@ -212,13 +302,24 @@ class TestHU002SeleccionarUsuario(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════
 
 class TestHU003CrearMateria(unittest.TestCase):
+    """
+    Pruebas unitarias para HU-003: Crear Materia.
+
+    Verifica validaciones de nombre y color, restricción de usuario activo,
+    unicidad del nombre por usuario y creación exitosa.
+    """
 
     def setUp(self):
+        """Reinicia la BD, crea un usuario y lo selecciona como activo."""
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         self.tm = TaskManager()
         usuario = self.tm.crear_usuario("Juan Lopez", "juan@mail.com")
         self.tm.seleccionar_usuario(usuario.idUsuario)
+
+    def tearDown(self):
+        """Limpia la BD después de cada test para evitar datos residuales."""
+        Base.metadata.drop_all(engine)
 
     # ── CASOS ROJOS ───────────────────────────────────────────────
 
@@ -296,14 +397,26 @@ class TestHU003CrearMateria(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════
 
 class TestHU004CrearTarea(unittest.TestCase):
+    """
+    Pruebas unitarias para HU-004: Crear Tarea.
+
+    Verifica validaciones de título, descripción, fecha, prioridad,
+    materia existente y propiedad de la materia. Confirma que el
+    estado inicial sea Pendiente.
+    """
 
     def setUp(self):
+        """Reinicia la BD, crea usuario activo y una materia base."""
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         self.tm = TaskManager()
         usuario = self.tm.crear_usuario("Juan Lopez", "juan@mail.com")
         self.tm.seleccionar_usuario(usuario.idUsuario)
         self.materia = self.tm.crear_materia("Matemáticas", "#FF5733")
+
+    def tearDown(self):
+        """Limpia la BD después de cada test para evitar datos residuales."""
+        Base.metadata.drop_all(engine)
 
     # ── CASOS ROJOS ───────────────────────────────────────────────
 
@@ -417,8 +530,15 @@ class TestHU004CrearTarea(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════
 
 class TestHU005MarcarDesmarcar(unittest.TestCase):
+    """
+    Pruebas unitarias para HU-005: Marcar y Desmarcar Tarea.
+
+    Verifica que el cambio de estado respeta la propiedad del usuario,
+    no permite estados redundantes y actualiza correctamente el estado.
+    """
 
     def setUp(self):
+        """Reinicia la BD, crea usuario activo, materia y tarea base."""
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         self.tm = TaskManager()
@@ -426,6 +546,10 @@ class TestHU005MarcarDesmarcar(unittest.TestCase):
         self.tm.seleccionar_usuario(usuario.idUsuario)
         self.materia = self.tm.crear_materia("Matemáticas", "#FF5733")
         self.tarea = crear_tarea_helper(self.tm, self.materia.idMateria)
+
+    def tearDown(self):
+        """Limpia la BD después de cada test para evitar datos residuales."""
+        Base.metadata.drop_all(engine)
 
     # ── CASOS ROJOS ───────────────────────────────────────────────
 
@@ -482,13 +606,25 @@ class TestHU005MarcarDesmarcar(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════
 
 class TestHU006EditarUsuario(unittest.TestCase):
+    """
+    Pruebas unitarias para HU-006: Editar Usuario.
+
+    Verifica que solo el usuario activo puede editarse a sí mismo,
+    las validaciones de nombre y correo, y la sincronización de
+    usuario_activo tras la edición.
+    """
 
     def setUp(self):
+        """Reinicia la BD, crea un usuario y lo selecciona como activo."""
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         self.tm = TaskManager()
         self.usuario = self.tm.crear_usuario("Juan Lopez", "juan@mail.com")
         self.tm.seleccionar_usuario(self.usuario.idUsuario)
+
+    def tearDown(self):
+        """Limpia la BD después de cada test para evitar datos residuales."""
+        Base.metadata.drop_all(engine)
 
     # ── CASOS ROJOS ───────────────────────────────────────────────
 
@@ -551,13 +687,25 @@ class TestHU006EditarUsuario(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════
 
 class TestHU007EliminarUsuario(unittest.TestCase):
+    """
+    Pruebas unitarias para HU-007: Eliminar Usuario.
+
+    Verifica que no se pueda eliminar otro usuario, que se requiera
+    limpiar materias previas, y que usuario_activo quede en None tras
+    la eliminación exitosa.
+    """
 
     def setUp(self):
+        """Reinicia la BD, crea un usuario y lo selecciona como activo."""
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         self.tm = TaskManager()
         self.usuario = self.tm.crear_usuario("Juan Lopez", "juan@mail.com")
         self.tm.seleccionar_usuario(self.usuario.idUsuario)
+
+    def tearDown(self):
+        """Limpia la BD después de cada test para evitar datos residuales."""
+        Base.metadata.drop_all(engine)
 
     # ── CASOS ROJOS ───────────────────────────────────────────────
 
@@ -596,8 +744,6 @@ class TestHU007EliminarUsuario(unittest.TestCase):
             self.tm.eliminar_usuario(id_eliminado)
         self.assertIn("usuario", str(ctx.exception).lower())
 
-        
-
     def test_rojo_id_tipo_invalido(self):
         """ID de tipo string debe lanzar TypeError."""
         with self.assertRaises(TypeError) as ctx:
@@ -622,8 +768,15 @@ class TestHU007EliminarUsuario(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════
 
 class TestHU008EditarMateria(unittest.TestCase):
+    """
+    Pruebas unitarias para HU-008: Editar Materia.
+
+    Verifica restricciones de propiedad, validaciones de nombre y color,
+    detección de duplicados y actualización correcta de los datos.
+    """
 
     def setUp(self):
+        """Reinicia la BD, crea usuario activo y una materia base."""
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         self.tm = TaskManager()
@@ -631,6 +784,10 @@ class TestHU008EditarMateria(unittest.TestCase):
         self.tm.seleccionar_usuario(usuario.idUsuario)
         self.materia = self.tm.crear_materia("Matemáticas", "#FF5733")
 
+    def tearDown(self):
+        """Limpia la BD después de cada test para evitar datos residuales."""
+        Base.metadata.drop_all(engine)
+        
     # ── CASOS ROJOS ───────────────────────────────────────────────
 
     def test_rojo_sin_usuario_activo(self):
@@ -691,8 +848,16 @@ class TestHU008EditarMateria(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════
 
 class TestHU009EditarTarea(unittest.TestCase):
+    """
+    Pruebas unitarias para HU-009: Editar Tarea.
+
+    Verifica que solo el propietario puede editar su tarea, valida
+    todos los campos modificables y confirma que el estado no cambia
+    al editar otros campos.
+    """
 
     def setUp(self):
+        """Reinicia la BD, crea usuario activo, materia y tarea base."""
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         self.tm = TaskManager()
@@ -700,7 +865,11 @@ class TestHU009EditarTarea(unittest.TestCase):
         self.tm.seleccionar_usuario(self.usuario.idUsuario)
         self.materia = self.tm.crear_materia("Matemáticas", "#FF5733")
         self.tarea = crear_tarea_helper(self.tm, self.materia.idMateria)
-
+    
+    def tearDown(self):
+        """Limpia la BD después de cada test para evitar datos residuales."""
+        Base.metadata.drop_all(engine)
+        
     # ── CASOS ROJOS ───────────────────────────────────────────────
 
     def test_rojo_sin_usuario_activo(self):
@@ -783,8 +952,15 @@ class TestHU009EditarTarea(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════
 
 class TestHU010EliminarMateria(unittest.TestCase):
+    """
+    Pruebas unitarias para HU-010: Eliminar Materia.
+
+    Verifica restricciones de propiedad, doble eliminación y que el
+    cascade elimine correctamente las tareas asociadas.
+    """
 
     def setUp(self):
+        """Reinicia la BD, crea usuario activo y una materia base."""
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         self.tm = TaskManager()
@@ -792,6 +968,10 @@ class TestHU010EliminarMateria(unittest.TestCase):
         self.tm.seleccionar_usuario(usuario.idUsuario)
         self.materia = self.tm.crear_materia("Matemáticas", "#FF5733")
 
+    def tearDown(self):
+        """Limpia la BD después de cada test para evitar datos residuales."""
+        Base.metadata.drop_all(engine)
+        
     # ── CASOS ROJOS ───────────────────────────────────────────────
 
     def test_rojo_sin_usuario_activo(self):
@@ -837,8 +1017,15 @@ class TestHU010EliminarMateria(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════
 
 class TestHU011EliminarTarea(unittest.TestCase):
+    """
+    Pruebas unitarias para HU-011: Eliminar Tarea.
+
+    Verifica restricciones de propiedad, tipo del ID, doble eliminación
+    y la correcta eliminación de la tarea de la base de datos.
+    """
 
     def setUp(self):
+        """Reinicia la BD, crea usuario activo, materia y tarea base."""
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         self.tm = TaskManager()
@@ -846,6 +1033,10 @@ class TestHU011EliminarTarea(unittest.TestCase):
         self.tm.seleccionar_usuario(usuario.idUsuario)
         self.materia = self.tm.crear_materia("Matemáticas", "#FF5733")
         self.tarea = crear_tarea_helper(self.tm, self.materia.idMateria)
+
+    def tearDown(self):
+        """Limpia la BD después de cada test para evitar datos residuales."""
+        Base.metadata.drop_all(engine)
 
     # ── CASOS ROJOS ───────────────────────────────────────────────
 

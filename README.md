@@ -4,12 +4,13 @@
 Sistema de gestión de tareas académicas desarrollado en Python que permite a estudiantes organizar sus pendientes por materias, establecer prioridades y llevar seguimiento de su progreso.
 
 ## 🎯 Objetivo de la Aplicación
-Facilitar la organización académica mediante un gestor de tareas que permita:
+Brindar una herramienta que permita a los estudiantes:
 - Crear, editar y eliminar tareas
 - Marcar tareas como completadas
-- Organizar tareas por materias con colores identificadores
-- Filtrar y ordenar tareas por diferentes criterios
-- Gestionar múltiples perfiles de usuario
+- Organizar tareas por materias
+- Gestionar múltiples perfiles
+- Filtrar tareas por estado o prioridad
+- Llevar control del progreso académico
 
 ## 👥 Integrantes del Equipo
 - CHUCHON SOTELO ERNESTO MARCIAL - 74765942
@@ -28,33 +29,56 @@ Facilitar la organización académica mediante un gestor de tareas que permita:
 1. **Clonar el repositorio**
 ```bash
 git clone https://github.com/Marcce265/ToDoList_GestordeTareasAcadmicas.git
-cd TO-DO-LIST-GESTOR-DE-TAREAS-ACADEMICAS
+cd ToDoList_GestordeTareasAcadmicas
 ```
 
 2. **Crear entorno virtual (recomendado)**
 ```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# Linux/Mac
-python3 -m venv venv
-source venv/bin/activate
+python -m venv .venv
 ```
 
-3. **Instalar dependencias**
+3. **Configurar PowerShell (solo si aparece error de ejecución)**
+```bash
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+```
+
+4. **Activar entorno virtual**
+```bash
+# Windows (PowerShell)
+.venv\Scripts\activate
+
+# Linux/Mac
+source .venv/bin/activate
+```
+
+5. **Desinstalar versiones previas de flet (importante)**
+```bash
+pip uninstall flet flet-desktop flet-core flet-runtime -y
+```
+
+6. **Instalar dependencias**
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Ejecutar la aplicación**
+7. **Crear base de datos (si es necesario)**
 ```bash
-python main.py
+python -c "from src.model.modelo import Base; from src.logic.task_manager import engine; Base.metadata.create_all(engine)"
+```
+
+### Ejecutar la Aplicación
+
+**Ejecutar la aplicación (interfaz gráfica)**
+```bash
+python -m src.view.ui_taskmaster
+```
+
+**Ejecutar la aplicación (consola)**
+```bash
+python run.py
 ```
 
 ## 🧪 Ejecución de Pruebas
-
-### Ejecutar pruebas unitarias
 ```bash
-python -m unittest discover src/tests
+py -m unittest tests.test_task_manager
 ```
