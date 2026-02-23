@@ -52,6 +52,9 @@ pip uninstall flet flet-desktop flet-core flet-runtime -y
 5. **Instalar dependencias**
 ```bash
 pip install -r requirements.txt
+
+`base datos rescrito ( opcional)
+python -c "from src.model.modelo import Base; from src.logic.task_manager import engine; Base.metadata.create_all(engine)"
 ```
 
 6. **Ejecutar la aplicación (interfaz gráfica)**
