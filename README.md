@@ -70,7 +70,7 @@ python -c "from src.model.modelo import Base; from src.logic.task_manager import
 
 **Ejecutar la aplicación (interfaz gráfica)**
 ```bash
-python ui_taskmaster.py
+python -m src.view.ui_taskmaster
 ```
 
 **Ejecutar la aplicación (consola)**
