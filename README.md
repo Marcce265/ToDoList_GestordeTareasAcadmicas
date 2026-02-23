@@ -4,12 +4,13 @@
 Sistema de gestión de tareas académicas desarrollado en Python que permite a estudiantes organizar sus pendientes por materias, establecer prioridades y llevar seguimiento de su progreso.
 
 ## 🎯 Objetivo de la Aplicación
-Facilitar la organización académica mediante un gestor de tareas que permita:
+Brindar una herramienta que permita a los estudiantes:
 - Crear, editar y eliminar tareas
 - Marcar tareas como completadas
-- Organizar tareas por materias con colores identificadores
-- Filtrar y ordenar tareas por diferentes criterios
-- Gestionar múltiples perfiles de usuario
+- Organizar tareas por materias
+- Gestionar múltiples perfiles
+- Filtrar tareas por estado o prioridad
+- Llevar control del progreso académico
 
 ## 👥 Integrantes del Equipo
 - CHUCHON SOTELO ERNESTO MARCIAL - 74765942
@@ -35,7 +36,13 @@ cd ToDoList_GestordeTareasAcadmicas
 ```bash
 python -m venv .venv
 ```
-3. **Activar entorno virtual**
+
+3. **Configurar PowerShell (solo si aparece error de ejecución)**
+```bash
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+```
+
+4. **Activar entorno virtual**
 ```bash
 # Windows (PowerShell)
 .venv\Scripts\activate
@@ -44,32 +51,34 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-4. **Desinstalar versiones previas de flet (importante)**
+5. **Desinstalar versiones previas de flet (importante)**
 ```bash
 pip uninstall flet flet-desktop flet-core flet-runtime -y
 ```
 
-5. **Instalar dependencias**
+6. **Instalar dependencias**
 ```bash
 pip install -r requirements.txt
+```
 
-`base datos rescrito ( opcional)
+7. **Crear base de datos (si es necesario)**
+```bash
 python -c "from src.model.modelo import Base; from src.logic.task_manager import engine; Base.metadata.create_all(engine)"
 ```
 
-6. **Ejecutar la aplicación (interfaz gráfica)**
+### Ejecutar la Aplicación
+
+**Ejecutar la aplicación (interfaz gráfica)**
 ```bash
 python ui_taskmaster.py
 ```
 
-7. **Ejecutar la aplicación (terminal)**
+**Ejecutar la aplicación (consola)**
 ```bash
 python run.py
 ```
 
 ## 🧪 Ejecución de Pruebas
-
-### Ejecutar pruebas unitarias
 ```bash
 py -m unittest tests.test_task_manager
 ```
