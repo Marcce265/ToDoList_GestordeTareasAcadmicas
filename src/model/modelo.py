@@ -155,6 +155,8 @@ class Materia(Base):
     __table_args__ = (
         UniqueConstraint('nombre', 'usuario_id', name='uq_materia_usuario'),
     )
+
+    def __repr__(self):
         """Representación legible del objeto para depuración."""
         return f"<Materia(id={self.idMateria}, nombre={self.nombre})>"
 
