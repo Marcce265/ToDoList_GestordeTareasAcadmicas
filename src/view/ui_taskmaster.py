@@ -679,6 +679,12 @@ def main(page: ft.Page):
         label_style=ft.TextStyle(size=12, color=MUTED, font_family=FONT),
         bgcolor=SURFACE, cursor_color=ACCENT,
     )
+    # ✅ AGREGAR DROPDOWN DE MATERIA
+    _etar_mat_dd = ft.Dropdown(
+        label="Materia", border_radius=10, border_color=BORDER,
+        focused_border_color=ACCENT,
+        label_style=ft.TextStyle(size=12, color=MUTED, font_family=FONT)
+    )
     _etar_pri_dd = ft.Dropdown(
         label="Prioridad", border_radius=10, border_color=BORDER,
         focused_border_color=ACCENT,
@@ -696,12 +702,15 @@ def main(page: ft.Page):
             pri_map = {"Alta": Prioridad.Alta, "Media": Prioridad.Media, "Baja": Prioridad.Baja}
             prioridad = pri_map.get(_etar_pri_dd.value, Prioridad.Media)
             fecha = date.fromisoformat(tf_etar_fecha.value.strip())
+            mat_id = int(_etar_mat_dd.value) if _etar_mat_dd.value else None  # ✅ OBTENER MATERIA
+            
             tm.editar_tarea(
                 _editing_tar_id[0],
                 nuevo_titulo=tf_etar_titulo.value or None,
                 nueva_descripcion=tf_etar_desc.value or None,
                 nueva_prioridad=prioridad,
                 nueva_fecha_entrega=fecha,
+                nueva_materia_id=mat_id,  # ✅ PASAR MATERIA
             )
             etar_close(); _refresh_tareas()
         except (ValueError, TypeError) as ex:
@@ -714,6 +723,7 @@ def main(page: ft.Page):
             content=ft.Column([
                 etar_ban, tf_etar_titulo,
                 ft.Container(height=4), tf_etar_desc,
+                ft.Container(height=4), _etar_mat_dd,  # ✅ AGREGAR AQUÍ
                 ft.Container(height=4), _etar_pri_dd,
                 ft.Container(height=4), tf_etar_fecha,
             ], spacing=6, tight=True),
@@ -727,12 +737,28 @@ def main(page: ft.Page):
     page.overlay.append(dlg_etar)
 
     def etar_open(t):
+        # ✅ CARGAR MATERIAS DEL USUARIO ACTIVO
+        from src.model.modelo import Materia
+        from sqlalchemy.orm import sessionmaker
+        from src.model.declarative_base import engine
+        S = sessionmaker(bind=engine)
+        s = S()
+        mats = s.query(Materia).filter_by(usuario_id=tm.usuario_activo.idUsuario).all()
+        
+        # ✅ LLENAR DROPDOWN DE MATERIAS
+        _etar_mat_dd.options = [ft.dropdown.Option(str(m.idMateria), m.nombre) for m in mats]
+        _etar_mat_dd.value = str(t.materia_id)  # ✅ SELECCIONAR MATERIA ACTUAL
+        
         _editing_tar_id[0] = t.idTarea
         tf_etar_titulo.value = t.titulo
         tf_etar_desc.value   = t.descripcion or ""
         _etar_pri_dd.value   = t.prioridad.name if t.prioridad else "Media"
         tf_etar_fecha.value  = str(t.fechaEntrega)
+        
+        s.close()
+        
         tf_etar_titulo.update(); tf_etar_desc.update()
+        _etar_mat_dd.update()  # ✅ ACTUALIZAR DROPDOWN
         _etar_pri_dd.update(); tf_etar_fecha.update()
         etar_hide(); dlg_etar.open = True; page.update()
 
@@ -853,6 +879,18 @@ def main(page: ft.Page):
 
     def _tarea_card(t):
         completada = t.estado == EstadoTarea.Completada
+        
+        # ✅ OBTENER MATERIA PARA MOSTRAR NOMBRE Y COLOR
+        from src.model.modelo import Materia
+        from sqlalchemy.orm import sessionmaker
+        from src.model.declarative_base import engine
+        S = sessionmaker(bind=engine)
+        s = S()
+        materia = s.query(Materia).filter_by(idMateria=t.materia_id).first()
+        s.close()
+        
+        nombre_materia = materia.nombre if materia else "Sin materia"
+        color_materia = materia.color if materia else MUTED
 
         def toggle(e):
             try:
@@ -882,21 +920,30 @@ def main(page: ft.Page):
                 ft.Column([
                     ft.Row([
                         T(t.titulo, size=13,
-                          weight=ft.FontWeight.W_600,
-                          color=MUTED if completada else INK),
+                        weight=ft.FontWeight.W_600,
+                        color=MUTED if completada else INK),
+                        # ✅ CHIP DE MATERIA CON COLOR
+                        ft.Container(
+                            content=T(nombre_materia, size=10, color=color_materia, 
+                                    weight=ft.FontWeight.W_600),
+                            bgcolor=hex_alpha(color_materia, 0.15),
+                            border=_ball(hex_alpha(color_materia, 0.30)),
+                            border_radius=6,
+                            padding=ft.Padding(8, 3, 8, 3),
+                        ),
                         chip_prioridad(t.prioridad),
                         chip_estado(t.estado),
                     ], spacing=8, wrap=True),
                     T(t.descripcion or "", size=11, color=MUTED,
-                      italic=True) if t.descripcion else ft.Container(height=0),
+                    italic=True) if t.descripcion else ft.Container(height=0),
                     T(f"Entrega: {t.fechaEntrega}", size=10, color=MUTED),
                 ], spacing=3, expand=True),
                 # Acciones
                 ft.Row([
                     small_icon_btn(ft.icons.EDIT_OUTLINED, MUTED,
-                                   lambda e, tt=t: etar_open(tt), tooltip="Editar"),
+                                lambda e, tt=t: etar_open(tt), tooltip="Editar"),
                     small_icon_btn(ft.icons.DELETE_OUTLINE, DANGER,
-                                   lambda e, tt=t: deltar_open(tt), tooltip="Eliminar"),
+                                lambda e, tt=t: deltar_open(tt), tooltip="Eliminar"),
                 ], spacing=6),
             ], spacing=10, vertical_alignment=ft.CrossAxisAlignment.CENTER),
             bgcolor=f"{SURFACE}" if completada else CARD,
