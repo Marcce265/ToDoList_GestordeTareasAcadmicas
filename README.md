@@ -79,6 +79,13 @@ python run.py
 ```
 
 ## 🧪 Ejecución de Pruebas
+**Pruebas unitarias**
 ```bash
 py -m unittest tests.test_task_manager
+```
+
+**Ejecutar Pruebas con Cobertura**
+```bash
+python -m coverage run -m unittest tests.test_task_manager
+python -m coverage report
 ```
