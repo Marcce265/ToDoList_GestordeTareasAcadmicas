@@ -9,23 +9,24 @@ from src.logic.task_manager import TaskManager
 from src.model.modelo import Prioridad, EstadoTarea
 
 # ── Paleta ──────────────────────────────────────────────
-BG      = "#F5F7FB"
-SURFACE = "#E9EEF6"
-CARD    = "#FFFFFF"
-BORDER  = "#D6DEEB"
-INK     = "#1E293B"
-MUTED   = "#64748B"
-ACCENT  = "#2563EB"
-DANGER  = "#DC2626"
-SUCCESS = "#16A34A"
-ERR_BG  = "#FEE2E2"
-ERR_FG  = "#B91C1C"
-OK_BG   = "#DCFCE7"
-OK_FG   = "#15803D"
-WARN_BG = "#FEF3C7"
-WARN_FG = "#B45309"
+# ── Paleta MORADO MINIMALISTA ──────────────────────────────
+BG      = "#FAFBFC"   # Fondo blanco suave
+SURFACE = "#F5F3FF"   # Sidebar morado clarísimo
+CARD    = "#FFFFFF"   # Tarjetas blancas puras
+BORDER  = "#E9D5FF"   # Bordes morado pastel
+INK     = "#1F1B2E"   # Texto principal oscuro
+MUTED   = "#8B7CA8"   # Texto secundario morado grisáceo
+ACCENT  = "#8B5CF6"   # Morado vibrante (violet-500)
+DANGER  = "#EC4899"   # Rosa/magenta en lugar de rojo
+SUCCESS = "#10B981"   # Verde esmeralda
+ERR_BG  = "#FCE7F3"   # Rosa pastel
+ERR_FG  = "#BE185D"   # Rosa oscuro
+OK_BG   = "#ECFDF5"   # Verde menta claro
+OK_FG   = "#059669"   # Verde esmeralda oscuro
+WARN_BG = "#FEF3C7"   # Amarillo pastel
+WARN_FG = "#D97706"   # Ámbar
 FONT    = "Segoe UI"
-AVATARES = ["🎓","👩‍💼","👨‍💻","📚","🧑‍🎓"]
+AVATARES = ["🎓","👩‍💼","👨‍💻","📚","🧑‍🎓","✨","💜","🌸"]
 
 COLORES_MATERIA = [
     ("#3B82F6", "Azul"),
@@ -45,6 +46,17 @@ PRIORIDADES = [
 ]
 
 # ── Helpers ─────────────────────────────────────────────
+def hex_alpha(color_hex, opacity):
+    """
+    Convierte color hex + opacidad a formato correcto #AARRGGBB
+    opacity: 0.0 a 1.0
+    """
+    # Quitar el # si existe
+    hex_color = color_hex.replace("#", "")
+    # Convertir opacidad a hex (00-FF)
+    alpha = format(int(opacity * 255), '02x')
+    # Formato correcto: #AARRGGBB
+    return f"#{alpha}{hex_color}"
 
 def _ball(color, w=1):
     s = ft.BorderSide(w, color)
@@ -119,7 +131,7 @@ def small_icon_btn(icon, color, on_click, tooltip=""):
         content=ft.Icon(icon, size=15, color=color),
         width=30, height=30,
         border_radius=6,
-        bgcolor=f"{color}18",
+        bgcolor=hex_alpha(color, 0.10),
         alignment=ft.Alignment(0, 0),
         on_click=on_click,
         ink=True,
@@ -132,7 +144,7 @@ def chip_prioridad(prioridad):
     c = colores.get(prioridad, MUTED)
     return ft.Container(
         content=T(nombres.get(prioridad, "—"), size=10, color=c, weight=ft.FontWeight.W_600),
-        bgcolor=f"{c}18", border=_ball(f"{c}40"),
+        bgcolor=hex_alpha(c, 0.10), border=_ball(hex_alpha(c, 0.20)),
         border_radius=6, padding=ft.Padding(8, 3, 8, 3),
     )
 
@@ -140,12 +152,12 @@ def chip_estado(estado):
     if estado == EstadoTarea.Completada:
         return ft.Container(
             content=T("✓ Completada", size=10, color=OK_FG, weight=ft.FontWeight.W_600),
-            bgcolor=OK_BG, border=_ball(OK_FG+"40"),
+            bgcolor=hex_alpha(OK_BG, 0.10), border=_ball(hex_alpha(OK_FG, 0.20)),
             border_radius=6, padding=ft.Padding(8, 3, 8, 3),
         )
     return ft.Container(
         content=T("Pendiente", size=10, color=WARN_FG, weight=ft.FontWeight.W_600),
-        bgcolor=WARN_BG, border=_ball(WARN_FG+"40"),
+        bgcolor=hex_alpha(WARN_BG, 0.10), border=_ball(hex_alpha(WARN_FG, 0.20)),
         border_radius=6, padding=ft.Padding(8, 3, 8, 3),
     )
 
@@ -325,9 +337,9 @@ def main(page: ft.Page):
                 ft.Container(
                     content=ft.Text(emoji, size=22),
                     width=46, height=46,
-                    bgcolor=f"{ACCENT}20", border_radius=23,
+                    bgcolor=hex_alpha(ACCENT, 0.12), border_radius=23,
                     alignment=ft.Alignment(0, 0),
-                    border=_ball(f"{ACCENT}40", 1),
+                    border=_ball(hex_alpha(ACCENT, 0.25), 1),
                 ),
                 ft.Column([
                     T(u.nombre, size=14, weight=ft.FontWeight.W_700),
@@ -363,7 +375,7 @@ def main(page: ft.Page):
             ], alignment=ft.MainAxisAlignment.CENTER, spacing=8),
             border=_ball(ACCENT, 1.5), border_radius=12,
             padding=ft.Padding(0, 14, 0, 14),
-            on_click=dlg_open, ink=True, bgcolor=f"{ACCENT}20",
+            on_click=dlg_open, ink=True, bgcolor=hex_alpha(ACCENT, 0.12),
         )
         return ft.Column([
             ft.Container(
@@ -401,7 +413,7 @@ def main(page: ft.Page):
                 bgcolor=hex_c, border_radius=14,
                 alignment=ft.Alignment(0, 0),
                 border=ft.border.all(3, "#FFFFFF") if sel else ft.border.all(2, hex_c),
-                shadow=ft.BoxShadow(blur_radius=6, color=f"{hex_c}55") if sel else None,
+                shadow=ft.BoxShadow(blur_radius=6, color=hex_alpha(hex_c, 0.33)) if sel else None,
                 on_click=lambda e, hc=hex_c: _pick_color(hc),
                 ink=True, tooltip=nombre,
             ))
@@ -472,7 +484,7 @@ def main(page: ft.Page):
                 bgcolor=hex_c, border_radius=14,
                 alignment=ft.Alignment(0, 0),
                 border=ft.border.all(3, "#FFFFFF") if sel else ft.border.all(2, hex_c),
-                shadow=ft.BoxShadow(blur_radius=6, color=f"{hex_c}55") if sel else None,
+                shadow=ft.BoxShadow(blur_radius=6, color=hex_alpha(hex_c, 0.33)) if sel else None,
                 on_click=lambda e, hc=hex_c: _epick_color(hc),
                 ink=True, tooltip=nombre,
             ))
@@ -806,7 +818,7 @@ def main(page: ft.Page):
         if not mats:
             mat_body.controls.append(ft.Container(
                 content=ft.Column([
-                    ft.Icon(ft.icons.BOOK_OUTLINED, size=48, color=f"{MUTED}55"),
+                    ft.Icon(ft.icons.BOOK_OUTLINED, size=48, color=hex_alpha(MUTED, 0.33)),
                     ft.Container(height=8),
                     T("No tienes materias aún", size=14, color=MUTED,
                       align=ft.TextAlign.CENTER),
@@ -972,7 +984,7 @@ def main(page: ft.Page):
                 T(label, size=13, color=ACCENT if active else MUTED,
                   weight=ft.FontWeight.W_600 if active else ft.FontWeight.NORMAL),
             ], spacing=10),
-            bgcolor=f"{ACCENT}18" if active else "transparent",
+            bgcolor=hex_alpha(ACCENT, 0.10) if active else "transparent",
             border_radius=10,
             padding=ft.Padding(14, 10, 14, 10),
             on_click=lambda e, i=idx: _nav_to(i),
@@ -1038,9 +1050,9 @@ def main(page: ft.Page):
     _uemail  = T("—", size=11, color=MUTED)
     _av_cont = ft.Container(
         content=_av_txt, width=40, height=40,
-        bgcolor=f"{ACCENT}25", border_radius=20,
+        bgcolor=hex_alpha(ACCENT, 0.15), border_radius=20,
         alignment=ft.Alignment(0, 0),
-        border=_ball(f"{ACCENT}50", 1),
+        border=_ball(hex_alpha(ACCENT, 0.20), 1),
     )
 
     def _refresh_sidebar_user():
@@ -1157,7 +1169,7 @@ def main(page: ft.Page):
                                 T("Editar", size=11, color=MUTED),
                             ], spacing=5),
                             on_click=dash_edit_open, ink=True, border_radius=7,
-                            padding=ft.Padding(10, 6, 10, 6), bgcolor=f"{MUTED}12",
+                            padding=ft.Padding(10, 6, 10, 6), bgcolor=hex_alpha(MUTED, 0.07),
                         ),
                         ft.Container(
                             content=ft.Row([
@@ -1165,7 +1177,7 @@ def main(page: ft.Page):
                                 T("Eliminar", size=11, color=DANGER),
                             ], spacing=5),
                             on_click=dash_del_open, ink=True, border_radius=7,
-                            padding=ft.Padding(10, 6, 10, 6), bgcolor=f"{DANGER}12",
+                            padding=ft.Padding(10, 6, 10, 6), bgcolor=hex_alpha(DANGER, 0.07),
                         ),
                     ], spacing=6),
                     ft.Container(height=6),
@@ -1176,7 +1188,7 @@ def main(page: ft.Page):
                         ], spacing=6),
                         on_click=lambda e: ir_bienvenida(),
                         ink=True, border_radius=7,
-                        padding=ft.Padding(10, 6, 10, 6), bgcolor=f"{MUTED}0A",
+                        padding=ft.Padding(10, 6, 10, 6), bgcolor=hex_alpha(MUTED, 0.04),
                     ),
                 ], spacing=0),
                 padding=ft.Padding(12, 14, 12, 16),
